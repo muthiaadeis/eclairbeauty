@@ -81,9 +81,16 @@ class ApiController extends Controller
         ];
 
         // Jam yang sudah terpakai
+        // substr(...,0,5) buat motong detik dari kolom TIME ("09:00:00" -> "09:00")
+        // biar formatnya sama kayak $jamTersedia di atas
         $jamTerpakai = Jadwal::where('tanggal_jadwal', $tanggal)
                              ->where('status_jadwal', '!=', 'batal')
                              ->pluck('jam_jadwal')
+                             ->map(function ($jam) {
+                                 return substr($jam, 0, 5);
+                             })
+                             ->unique()
+                             ->values()
                              ->toArray();
 
         // Filter jam yang masih tersedia
@@ -95,44 +102,7 @@ class ApiController extends Controller
             'success' => true,
             'tanggal' => $tanggal,
             'jam_tersedia' => array_values($tersedia),
-        ]);
-    }
-
-    // Booking jadwal
-    public function booking(Request $request)
-    {
-        $pasien = $request->pasien;
-
-        $request->validate([
-            'tanggal_jadwal' => 'required|date',
-            'jam_jadwal' => 'required',
-        ]);
-
-        // Cek apakah jam masih tersedia
-        $cek = Jadwal::where('tanggal_jadwal', $request->tanggal_jadwal)
-                     ->where('jam_jadwal', $request->jam_jadwal)
-                     ->where('status_jadwal', '!=', 'batal')
-                     ->first();
-
-        if($cek) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Jam tersebut sudah terisi!'
-            ], 400);
-        }
-
-        $jadwal = Jadwal::create([
-            'pasien_id' => $pasien->id,
-            'tanggal_jadwal' => $request->tanggal_jadwal,
-            'jam_jadwal' => $request->jam_jadwal,
-            'status_jadwal' => 'menunggu',
-            'keterangan' => $request->keterangan ?? 'Booking via aplikasi',
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Booking berhasil!',
-            'jadwal' => $jadwal,
+            'jam_penuh' => $jamTerpakai,
         ]);
     }
 
