@@ -72,17 +72,15 @@ class ApiController extends Controller
     {
         $tanggal = $request->get('tanggal', date('Y-m-d'));
 
-        // Jam yang tersedia
+        // Semua slot jam yang ada
         $jamTersedia = [
             '09:00', '09:30', '10:00', '10:30',
             '11:00', '11:30', '13:00', '13:30',
             '14:00', '14:30', '15:00', '15:30',
-            '16:00', '16:30'
+            '16:00', '16:30', '17:00'
         ];
 
-        // Jam yang sudah terpakai
-        // substr(...,0,5) buat motong detik dari kolom TIME ("09:00:00" -> "09:00")
-        // biar formatnya sama kayak $jamTersedia di atas
+        // Jam yang sudah terpakai (buat ditandai abu-abu, BUKAN dibuang dari daftar)
         $jamTerpakai = Jadwal::where('tanggal_jadwal', $tanggal)
                              ->where('status_jadwal', '!=', 'batal')
                              ->pluck('jam_jadwal')
@@ -93,15 +91,10 @@ class ApiController extends Controller
                              ->values()
                              ->toArray();
 
-        // Filter jam yang masih tersedia
-        $tersedia = array_filter($jamTersedia, function($jam) use ($jamTerpakai) {
-            return !in_array($jam, $jamTerpakai);
-        });
-
         return response()->json([
             'success' => true,
             'tanggal' => $tanggal,
-            'jam_tersedia' => array_values($tersedia),
+            'jam_tersedia' => $jamTersedia, // kirim SEMUA slot, jangan difilter lagi
             'jam_penuh' => $jamTerpakai,
         ]);
     }
