@@ -27,24 +27,6 @@
     min-width: 140px;
 }
 .filter-input:focus { border-color: #C17B7B; background: white; }
-.btn-filter {
-    padding: 9px 20px;
-    background: #C17B7B; color: white;
-    border: none; border-radius: 10px;
-    cursor: pointer; font-size: 13px; font-weight: 600;
-    transition: background 0.2s; white-space: nowrap;
-}
-.btn-filter:hover { background: #B06B6B; }
-.btn-reset {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 16px; background: #FAF6F2; color: #6B6B6B;
-    border: 1px solid #E8DDD5; border-radius: 10px;
-    text-decoration: none; font-size: 13px; font-weight: 500;
-    transition: all 0.2s; white-space: nowrap;
-}
-.btn-reset:hover {
-    background: #F0E8E2; color: #3A3A3A; border-color: #D4C5B9;
-}
 .btn-cetak {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 9px 18px;
@@ -191,15 +173,6 @@
                 <option value="batal"    {{ ($status??'')==='batal'    ? 'selected' : '' }}>Batal</option>
             </select>
         </div>
-        @if(request()->hasAny(['dari','sampai','status']))
-            <a href="{{ route('pemilik.laporan') }}" class="btn-reset">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                    <path d="M3 3v5h5"/>
-                </svg>
-                Reset Filter
-            </a>
-        @endif
     </form>
 </div>
 
