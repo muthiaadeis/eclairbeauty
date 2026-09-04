@@ -28,6 +28,13 @@
             top: 0;
             left: 0;
             height: 100vh;
+            z-index: 50;
+            transition: transform 0.25s ease;
+        }
+
+        /* Sidebar tertutup: geser keluar layar, main-content balik rapat ke kiri */
+        .app-layout.sidebar-closed .sidebar {
+            transform: translateX(-100%);
         }
 
         .sidebar-logo {
@@ -56,6 +63,7 @@
         .sidebar-menu {
             flex: 1;
             padding: 16px 12px;
+            overflow-y: auto;
         }
 
         .sidebar-menu a {
@@ -133,14 +141,75 @@
             text-decoration: none;
         }
 
+        /* ===== SIDEBAR BACKDROP (buat mode overlay di layar sempit) ===== */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 40;
+        }
+        .app-layout.sidebar-open-mobile .sidebar-backdrop {
+            display: block;
+        }
+
+        /* ===== TOPBAR (tombol buka/tutup sidebar) ===== */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            background: #FDF8F4;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 24px 0;
+        }
+
+        .sidebar-toggle-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1px solid #E8DDD5;
+            background: #FFFFFF;
+            color: #6B6B6B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .sidebar-toggle-btn:hover {
+            background: #FBF1EC;
+            color: #C17B7B;
+            border-color: #C17B7B;
+        }
+
+        .topbar-brand {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #3A3A3A;
+            display: none;
+        }
+        .app-layout.sidebar-closed .topbar-brand {
+            display: block;
+        }
+
         /* ===== MAIN CONTENT ===== */
         .main-content {
             flex: 1;
+            min-width: 0;
             margin-left: 250px;
+            transition: margin-left 0.25s ease;
+        }
+
+        .app-layout.sidebar-closed .main-content {
+            margin-left: 0;
         }
 
         .page-content {
-            padding: 32px;
+            padding: 24px 32px 32px;
         }
 
         .page-breadcrumb {
@@ -168,6 +237,8 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 12px;
             margin-bottom: 24px;
         }
 
@@ -206,6 +277,7 @@
             border-radius: 16px;
             padding: 24px;
             box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            max-width: 100%;
         }
 
         .stat-grid {
@@ -251,7 +323,13 @@
             color: #3A3A3A;
         }
 
-        table { width: 100%; border-collapse: collapse; }
+        /* Tabel bisa di-scroll horizontal di layar sempit, gak bikin layout pecah */
+        .table-scroll {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 560px; }
         thead th {
             text-align: left;
             font-size: 11px;
@@ -313,11 +391,47 @@
             font-size: 14px;
         }
 
+        /* ===== RESPONSIVE ===== */
+
+        /* Layar medium (tablet / window di-split) — sidebar default ketutup, jadi overlay */
+        @media (max-width: 1024px) {
+            .app-layout:not(.sidebar-open-mobile) .sidebar {
+                transform: translateX(-100%);
+            }
+            .app-layout:not(.sidebar-open-mobile) .main-content {
+                margin-left: 0;
+            }
+            .app-layout.sidebar-open-mobile .sidebar {
+                transform: translateX(0);
+                box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+            }
+            .app-layout.sidebar-open-mobile .main-content {
+                margin-left: 0;
+            }
+            .topbar-brand { display: block; }
+
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Layar kecil / HP */
+        @media (max-width: 640px) {
+            .page-content { padding: 16px; }
+            .topbar { padding: 12px 16px 0; }
+            .stat-grid { grid-template-columns: 1fr; }
+            .page-title { font-size: 21px; }
+            .page-header-row { flex-direction: column; align-items: stretch; }
+            .card { padding: 16px; }
+            .sidebar { width: 230px; }
+        }
+
         @yield('extra_style')
     </style>
 </head>
 <body>
-    <div class="app-layout">
+    <div class="app-layout" id="appLayout">
+
+        <!-- BACKDROP (dipakai pas sidebar dibuka sebagai overlay di layar sempit) -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
         <!-- SIDEBAR -->
         <aside class="sidebar">
@@ -368,11 +482,67 @@
 
         <!-- MAIN CONTENT -->
         <div class="main-content">
+            <div class="topbar">
+                <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Buka/tutup sidebar">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+                <div class="topbar-brand">ECLAIR BEAUTY CLINIC</div>
+            </div>
             <main class="page-content">
                 @yield('content')
             </main>
         </div>
 
     </div>
+
+    <script>
+        (function() {
+            const appLayout = document.getElementById('appLayout');
+            const toggleBtn = document.getElementById('sidebarToggleBtn');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            const MOBILE_BREAKPOINT = 1024;
+
+            function isMobileWidth() {
+                return window.innerWidth <= MOBILE_BREAKPOINT;
+            }
+
+            function applyStoredState() {
+                if (isMobileWidth()) {
+                    // Di layar sempit, sidebar defaultnya ketutup (overlay pas dibuka)
+                    appLayout.classList.remove('sidebar-open-mobile');
+                    appLayout.classList.remove('sidebar-closed');
+                } else {
+                    const closed = localStorage.getItem('eclair_sidebar_closed') === '1';
+                    appLayout.classList.toggle('sidebar-closed', closed);
+                    appLayout.classList.remove('sidebar-open-mobile');
+                }
+            }
+
+            toggleBtn.addEventListener('click', function() {
+                if (isMobileWidth()) {
+                    appLayout.classList.toggle('sidebar-open-mobile');
+                } else {
+                    const nowClosed = appLayout.classList.toggle('sidebar-closed');
+                    localStorage.setItem('eclair_sidebar_closed', nowClosed ? '1' : '0');
+                }
+            });
+
+            backdrop.addEventListener('click', function() {
+                appLayout.classList.remove('sidebar-open-mobile');
+            });
+
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(applyStoredState, 150);
+            });
+
+            applyStoredState();
+        })();
+    </script>
 </body>
 </html>
