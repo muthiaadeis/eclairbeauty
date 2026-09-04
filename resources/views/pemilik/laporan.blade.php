@@ -17,16 +17,136 @@
     text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
 }
 .filter-input {
-    padding: 9px 14px;
-    border: 1px solid #F0E8E2;
+    height: 38px;
+    box-sizing: border-box;
+    padding: 8px 14px;
+    border: 1.5px solid #F0E8E2;
     border-radius: 10px;
     font-size: 13px; color: #3A3A3A;
     background: #FAF6F2;
     outline: none;
-    transition: border 0.2s;
+    transition: all 0.2s;
     min-width: 140px;
+    font-family: inherit;
 }
-.filter-input:focus { border-color: #C17B7B; background: white; }
+.filter-input:hover { border-color: #D4C5B9; background: #F8F2EC; }
+.filter-input:focus {
+    border-color: #C17B7B;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(193, 123, 123, 0.12);
+}
+
+/* Custom Dropdown */
+.custom-dropdown {
+    position: relative;
+    min-width: 175px;
+}
+.dropdown-trigger {
+    width: 100%;
+    height: 38px;
+    box-sizing: border-box;
+    padding: 0 14px;
+    background: #FAF6F2;
+    border: 1.5px solid #F0E8E2;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #3A3A3A;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+    user-select: none;
+}
+.dropdown-trigger:hover {
+    border-color: #D4C5B9;
+    background: #F8F2EC;
+}
+.custom-dropdown.open .dropdown-trigger,
+.dropdown-trigger:focus {
+    border-color: #C17B7B;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(193, 123, 123, 0.12);
+}
+.dropdown-arrow {
+    color: #9B9B9B;
+    transition: transform 0.25s ease, color 0.2s ease;
+    flex-shrink: 0;
+}
+.custom-dropdown.open .dropdown-arrow {
+    transform: rotate(180deg);
+    color: #C17B7B;
+}
+.dropdown-options {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    min-width: 190px;
+    background: white;
+    border: 1px solid #F0E8E2;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+    padding: 6px;
+    z-index: 100;
+    animation: dropFade 0.15s ease-out;
+}
+.custom-dropdown.open .dropdown-options {
+    display: block;
+}
+@keyframes dropFade {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.dropdown-opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #3A3A3A;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+}
+.dropdown-opt:hover {
+    background: #FAF6F2;
+    color: #C17B7B;
+}
+.dropdown-opt.selected {
+    background: #FDF3F1;
+    color: #C17B7B;
+    font-weight: 600;
+}
+.dropdown-opt .check-icon {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+.dot-all { background: #A09893; }
+.dot-menunggu { background: #D99B26; box-shadow: 0 0 0 2.5px #FDF0DC; }
+.dot-hadir { background: #2C7A9B; box-shadow: 0 0 0 2.5px #DCEEF5; }
+.dot-selesai { background: #2E8B4F; box-shadow: 0 0 0 2.5px #DCF0E0; }
+.dot-batal { background: #C0392B; box-shadow: 0 0 0 2.5px #FBE0E0; }
+.trigger-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .btn-cetak {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 9px 18px;
@@ -165,13 +285,64 @@
         </div>
         <div class="filter-group">
             <label>Status</label>
-            <select name="status" class="filter-input" style="cursor:pointer;" onchange="this.form.submit()">
-                <option value="">Semua Status</option>
-                <option value="menunggu" {{ ($status??'')==='menunggu' ? 'selected' : '' }}>Menunggu</option>
-                <option value="hadir"    {{ ($status??'')==='hadir'    ? 'selected' : '' }}>Dalam Perawatan</option>
-                <option value="selesai"  {{ ($status??'')==='selesai'  ? 'selected' : '' }}>Selesai</option>
-                <option value="batal"    {{ ($status??'')==='batal'    ? 'selected' : '' }}>Batal</option>
-            </select>
+            <div class="custom-dropdown" id="statusDropdown">
+                <input type="hidden" name="status" id="statusInput" value="{{ $status ?? '' }}">
+                <button type="button" class="dropdown-trigger" id="dropdownTrigger" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="trigger-label">
+                        @if(($status ?? '') === 'menunggu')
+                            <span class="status-dot dot-menunggu"></span> Menunggu
+                        @elseif(($status ?? '') === 'hadir')
+                            <span class="status-dot dot-hadir"></span> Dalam Perawatan
+                        @elseif(($status ?? '') === 'selesai')
+                            <span class="status-dot dot-selesai"></span> Selesai
+                        @elseif(($status ?? '') === 'batal')
+                            <span class="status-dot dot-batal"></span> Batal
+                        @else
+                            <span class="status-dot dot-all"></span> Semua Status
+                        @endif
+                    </span>
+                    <svg class="dropdown-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="dropdown-options" id="dropdownOptions" role="listbox">
+                    <div class="dropdown-opt {{ empty($status) ? 'selected' : '' }}" data-value="">
+                        <span class="status-dot dot-all"></span>
+                        <span>Semua Status</span>
+                        @if(empty($status))
+                            <svg class="check-icon" width="14" height="14" fill="none" stroke="#C17B7B" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        @endif
+                    </div>
+                    <div class="dropdown-opt {{ ($status ?? '') === 'menunggu' ? 'selected' : '' }}" data-value="menunggu">
+                        <span class="status-dot dot-menunggu"></span>
+                        <span>Menunggu</span>
+                        @if(($status ?? '') === 'menunggu')
+                            <svg class="check-icon" width="14" height="14" fill="none" stroke="#C17B7B" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        @endif
+                    </div>
+                    <div class="dropdown-opt {{ ($status ?? '') === 'hadir' ? 'selected' : '' }}" data-value="hadir">
+                        <span class="status-dot dot-hadir"></span>
+                        <span>Dalam Perawatan</span>
+                        @if(($status ?? '') === 'hadir')
+                            <svg class="check-icon" width="14" height="14" fill="none" stroke="#C17B7B" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        @endif
+                    </div>
+                    <div class="dropdown-opt {{ ($status ?? '') === 'selesai' ? 'selected' : '' }}" data-value="selesai">
+                        <span class="status-dot dot-selesai"></span>
+                        <span>Selesai</span>
+                        @if(($status ?? '') === 'selesai')
+                            <svg class="check-icon" width="14" height="14" fill="none" stroke="#C17B7B" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        @endif
+                    </div>
+                    <div class="dropdown-opt {{ ($status ?? '') === 'batal' ? 'selected' : '' }}" data-value="batal">
+                        <span class="status-dot dot-batal"></span>
+                        <span>Batal</span>
+                        @if(($status ?? '') === 'batal')
+                            <svg class="check-icon" width="14" height="14" fill="none" stroke="#C17B7B" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
     </form>
 </div>
@@ -343,4 +514,52 @@
     </div>
 </div>
 
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dropdown = document.getElementById('statusDropdown');
+        const trigger = document.getElementById('dropdownTrigger');
+        const input = document.getElementById('statusInput');
+        const form = document.getElementById('filterForm');
+
+        if (!dropdown || !trigger) return;
+
+        trigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const isOpen = dropdown.classList.contains('open');
+            dropdown.classList.toggle('open');
+            trigger.setAttribute('aria-expanded', !isOpen);
+        });
+
+        document.querySelectorAll('.dropdown-opt').forEach(function (opt) {
+            opt.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const val = this.getAttribute('data-value');
+                if (input.value !== val) {
+                    input.value = val;
+                    form.submit();
+                } else {
+                    dropdown.classList.remove('open');
+                    trigger.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && dropdown.classList.contains('open')) {
+                dropdown.classList.remove('open');
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+        });
+    });
+</script>
 @endsection
