@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Pasien;
 use App\Models\Jadwal;
 use App\Models\RekamMedis;
+use App\Models\User;
 
 class ApiController extends Controller
 {
@@ -99,7 +100,7 @@ class ApiController extends Controller
         ]);
     }
 
-    // Booking jadwal baru
+        // Booking jadwal baru
     public function booking(Request $request)
     {
         $pasien = $request->pasien;
@@ -122,8 +123,14 @@ class ApiController extends Controller
             ], 400);
         }
 
+        // Auto-assign ke dokter yang ada (saat ini baru 1 dokter aktif)
+        $dokter = User::where('role', 'dokter')
+                      ->where('status_aktif', true)
+                      ->first();
+
         $jadwal = Jadwal::create([
             'pasien_id' => $pasien->id,
+            'dokter_id' => $dokter?->id,
             'tanggal_jadwal' => $request->tanggal_jadwal,
             'jam_jadwal' => $request->jam_jadwal,
             'status_jadwal' => 'menunggu',
@@ -136,7 +143,6 @@ class ApiController extends Controller
             'jadwal' => $jadwal,
         ]);
     }
-
     // Jadwal pasien
     public function jadwalSaya(Request $request)
     {
