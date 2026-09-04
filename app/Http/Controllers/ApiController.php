@@ -91,7 +91,7 @@ class ApiController extends Controller
                              ->values()
                              ->toArray();
 
-        return response()->json([
+                return response()->json([
             'success' => true,
             'tanggal' => $tanggal,
             'jam_tersedia' => $jamTersedia, // kirim SEMUA slot, jangan difilter lagi
@@ -99,23 +99,46 @@ class ApiController extends Controller
         ]);
     }
 
-    // Jadwal pasien
-    public function jadwalSaya(Request $request)
+    // Booking jadwal baru
+    public function booking(Request $request)
     {
         $pasien = $request->pasien;
 
-        $jadwal = Jadwal::where('pasien_id', $pasien->id)
-                        ->orderBy('tanggal_jadwal', 'desc')
-                        ->get();
+        $request->validate([
+            'tanggal_jadwal' => 'required|date',
+            'jam_jadwal' => 'required',
+        ]);
+
+        // Cek apakah jam masih tersedia
+        $cek = Jadwal::where('tanggal_jadwal', $request->tanggal_jadwal)
+                     ->where('jam_jadwal', $request->jam_jadwal)
+                     ->where('status_jadwal', '!=', 'batal')
+                     ->first();
+
+        if($cek) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Jam tersebut sudah terisi!'
+            ], 400);
+        }
+
+        $jadwal = Jadwal::create([
+            'pasien_id' => $pasien->id,
+            'tanggal_jadwal' => $request->tanggal_jadwal,
+            'jam_jadwal' => $request->jam_jadwal,
+            'status_jadwal' => 'menunggu',
+            'keterangan' => $request->keterangan ?? 'Booking via aplikasi',
+        ]);
 
         return response()->json([
             'success' => true,
+            'message' => 'Booking berhasil!',
             'jadwal' => $jadwal,
         ]);
     }
 
-    // Riwayat tindakan pasien
-    public function riwayat(Request $request)
+    // Jadwal pasien
+    public function jadwalSaya(Request $request)
     {
         $pasien = $request->pasien;
 
