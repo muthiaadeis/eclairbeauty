@@ -37,8 +37,63 @@
             transform: translateX(-100%);
         }
 
+        .sidebar-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 12px 12px 0;
+        }
+
+        .sidebar-toggle-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            border: 1px solid #F0E8E2;
+            background: #FDFAF8;
+            color: #6B6B6B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .sidebar-toggle-btn:hover {
+            background: #FBF1EC;
+            color: #C17B7B;
+            border-color: #C17B7B;
+        }
+
+        /* Tombol buka sidebar (floating), cuma keliatan pas sidebar ketutup */
+        .sidebar-open-fab {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid #E8DDD5;
+            background: #FFFFFF;
+            color: #6B6B6B;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 45;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+        }
+        .sidebar-open-fab:hover {
+            background: #FBF1EC;
+            color: #C17B7B;
+            border-color: #C17B7B;
+        }
+        .app-layout.sidebar-closed .sidebar-open-fab {
+            display: flex;
+        }
+
         .sidebar-logo {
-            padding: 28px 20px 20px;
+            padding: 8px 20px 20px;
             text-align: center;
             border-bottom: 1px solid #F5EEE8;
         }
@@ -153,49 +208,6 @@
             display: block;
         }
 
-        /* ===== TOPBAR (tombol buka/tutup sidebar) ===== */
-        .topbar {
-            position: sticky;
-            top: 0;
-            z-index: 30;
-            background: #FDF8F4;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 24px 0;
-        }
-
-        .sidebar-toggle-btn {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            border: 1px solid #E8DDD5;
-            background: #FFFFFF;
-            color: #6B6B6B;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: all 0.2s;
-        }
-        .sidebar-toggle-btn:hover {
-            background: #FBF1EC;
-            color: #C17B7B;
-            border-color: #C17B7B;
-        }
-
-        .topbar-brand {
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: #3A3A3A;
-            display: none;
-        }
-        .app-layout.sidebar-closed .topbar-brand {
-            display: block;
-        }
-
         /* ===== MAIN CONTENT ===== */
         .main-content {
             flex: 1;
@@ -209,7 +221,12 @@
         }
 
         .page-content {
-            padding: 24px 32px 32px;
+            padding: 32px;
+        }
+
+        /* Kasih ruang atas biar gak ketiban tombol floating pas sidebar ketutup */
+        .app-layout.sidebar-closed .page-content {
+            padding-top: 76px;
         }
 
         .page-breadcrumb {
@@ -401,6 +418,12 @@
             .app-layout:not(.sidebar-open-mobile) .main-content {
                 margin-left: 0;
             }
+            .app-layout:not(.sidebar-open-mobile) .page-content {
+                padding-top: 76px;
+            }
+            .app-layout:not(.sidebar-open-mobile) .sidebar-open-fab {
+                display: flex;
+            }
             .app-layout.sidebar-open-mobile .sidebar {
                 transform: translateX(0);
                 box-shadow: 4px 0 24px rgba(0,0,0,0.15);
@@ -408,7 +431,9 @@
             .app-layout.sidebar-open-mobile .main-content {
                 margin-left: 0;
             }
-            .topbar-brand { display: block; }
+            .app-layout.sidebar-open-mobile .sidebar-open-fab {
+                display: none;
+            }
 
             .stat-grid { grid-template-columns: repeat(2, 1fr); }
         }
@@ -416,12 +441,15 @@
         /* Layar kecil / HP */
         @media (max-width: 640px) {
             .page-content { padding: 16px; }
-            .topbar { padding: 12px 16px 0; }
+            .app-layout:not(.sidebar-open-mobile) .page-content {
+                padding-top: 68px;
+            }
             .stat-grid { grid-template-columns: 1fr; }
             .page-title { font-size: 21px; }
             .page-header-row { flex-direction: column; align-items: stretch; }
             .card { padding: 16px; }
             .sidebar { width: 230px; }
+            .sidebar-open-fab { top: 12px; left: 12px; }
         }
 
         @yield('extra_style')
@@ -433,8 +461,26 @@
         <!-- BACKDROP (dipakai pas sidebar dibuka sebagai overlay di layar sempit) -->
         <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
+        <!-- TOMBOL BUKA SIDEBAR (floating, cuma muncul pas sidebar ketutup) -->
+        <button class="sidebar-open-fab" id="sidebarOpenBtn" aria-label="Buka sidebar">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
+
         <!-- SIDEBAR -->
         <aside class="sidebar">
+            <div class="sidebar-top-row">
+                <button class="sidebar-toggle-btn" id="sidebarCloseBtn" aria-label="Tutup sidebar">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
             <div class="sidebar-logo">
                 <img src="{{ asset('images/logo-eclair.png') }}" alt="Eclair Beauty Clinic" class="sidebar-logo-icon">
                 <div class="sidebar-logo-text">ECLAIR BEAUTY CLINIC</div>
@@ -482,16 +528,6 @@
 
         <!-- MAIN CONTENT -->
         <div class="main-content">
-            <div class="topbar">
-                <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Buka/tutup sidebar">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <line x1="3" y1="6" x2="21" y2="6"/>
-                        <line x1="3" y1="12" x2="21" y2="12"/>
-                        <line x1="3" y1="18" x2="21" y2="18"/>
-                    </svg>
-                </button>
-                <div class="topbar-brand">ECLAIR BEAUTY CLINIC</div>
-            </div>
             <main class="page-content">
                 @yield('content')
             </main>
@@ -502,7 +538,8 @@
     <script>
         (function() {
             const appLayout = document.getElementById('appLayout');
-            const toggleBtn = document.getElementById('sidebarToggleBtn');
+            const openBtn = document.getElementById('sidebarOpenBtn');
+            const closeBtn = document.getElementById('sidebarCloseBtn');
             const backdrop = document.getElementById('sidebarBackdrop');
             const MOBILE_BREAKPOINT = 1024;
 
@@ -522,18 +559,27 @@
                 }
             }
 
-            toggleBtn.addEventListener('click', function() {
+            function openSidebar() {
                 if (isMobileWidth()) {
-                    appLayout.classList.toggle('sidebar-open-mobile');
+                    appLayout.classList.add('sidebar-open-mobile');
                 } else {
-                    const nowClosed = appLayout.classList.toggle('sidebar-closed');
-                    localStorage.setItem('eclair_sidebar_closed', nowClosed ? '1' : '0');
+                    appLayout.classList.remove('sidebar-closed');
+                    localStorage.setItem('eclair_sidebar_closed', '0');
                 }
-            });
+            }
 
-            backdrop.addEventListener('click', function() {
-                appLayout.classList.remove('sidebar-open-mobile');
-            });
+            function closeSidebar() {
+                if (isMobileWidth()) {
+                    appLayout.classList.remove('sidebar-open-mobile');
+                } else {
+                    appLayout.classList.add('sidebar-closed');
+                    localStorage.setItem('eclair_sidebar_closed', '1');
+                }
+            }
+
+            openBtn.addEventListener('click', openSidebar);
+            closeBtn.addEventListener('click', closeSidebar);
+            backdrop.addEventListener('click', closeSidebar);
 
             let resizeTimer;
             window.addEventListener('resize', function() {
