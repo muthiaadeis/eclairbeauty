@@ -203,21 +203,73 @@
     text-transform: uppercase; letter-spacing: 0.3px;
 }
 
+/* Status Badges */
+.badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 14px !important;
+    border-radius: 999px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+    text-transform: none !important;
+    letter-spacing: 0.2px;
+}
+.badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+.badge-selesai {
+    background: #EAF6EE !important;
+    color: #1F7A44 !important;
+    border: 1px solid rgba(46, 139, 79, 0.2);
+}
+.badge-selesai .badge-dot { background: #2E8B4F; }
+
+.badge-hadir {
+    background: #EBF4F9 !important;
+    color: #1E6888 !important;
+    border: 1px solid rgba(44, 122, 155, 0.2);
+}
+.badge-hadir .badge-dot { background: #2C7A9B; }
+
+.badge-menunggu {
+    background: #FDF6EB !important;
+    color: #9A6E08 !important;
+    border: 1px solid rgba(184, 134, 11, 0.2);
+}
+.badge-menunggu .badge-dot { background: #B8860B; }
+
+.badge-batal {
+    background: #FCEEEE !important;
+    color: #A3291B !important;
+    border: 1px solid rgba(192, 57, 43, 0.2);
+}
+.badge-batal .badge-dot { background: #C0392B; }
+
 .table-footer-pagination {
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 20px; border-top: 1px solid #F0E8E2;
-    font-size: 12px; color: #9B9B9B;
+    font-size: 12.5px; color: #9B9B9B;
 }
 .pag-btns { display: flex; gap: 6px; align-items: center; }
 .pag-btn {
-    min-width: 30px; height: 30px; padding: 0 8px;
-    border-radius: 8px; border: 1px solid #F0E8E2;
+    min-width: 32px; height: 32px; padding: 0 8px;
+    border-radius: 8px; border: 1px solid #E8DDD5;
     background: white; color: #6B6B6B;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 12px; text-decoration: none; transition: all 0.2s;
+    font-size: 12.5px; font-weight: 500; text-decoration: none; transition: all 0.2s;
 }
-.pag-btn:hover { background: #FBF1EC; border-color: #C17B7B; color: #C17B7B; }
-.pag-btn.active { background: #C17B7B; color: white; border-color: #C17B7B; }
+.pag-btn:hover:not(.disabled) { background: #FAF6F2; border-color: #C17B7B; color: #C17B7B; }
+.pag-btn.active {
+    background: #C17B7B; color: white; border-color: #C17B7B;
+    font-weight: 600; box-shadow: 0 2px 6px rgba(193, 123, 123, 0.25);
+}
 
 /* Side panel */
 .side-panel { display: flex; flex-direction: column; gap: 16px; }
@@ -358,7 +410,7 @@
                         <th style="width:100px;">ID Pasien</th>
                         <th>Waktu Kunjungan</th>
                         <th>Keterangan</th>
-                        <th style="width:120px;">Status</th>
+                        <th style="width:170px;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -394,13 +446,13 @@
                         </td>
                         <td>
                             @if($j->status_jadwal == 'selesai')
-                                <span class="badge badge-selesai">Selesai</span>
+                                <span class="badge badge-selesai"><span class="badge-dot"></span>Selesai</span>
                             @elseif($j->status_jadwal == 'hadir')
-                                <span class="badge badge-hadir">Dalam Perawatan</span>
+                                <span class="badge badge-hadir"><span class="badge-dot"></span>Dalam Perawatan</span>
                             @elseif($j->status_jadwal == 'batal')
-                                <span class="badge badge-batal">Batal</span>
+                                <span class="badge badge-batal"><span class="badge-dot"></span>Batal</span>
                             @else
-                                <span class="badge badge-menunggu">Menunggu</span>
+                                <span class="badge badge-menunggu"><span class="badge-dot"></span>Menunggu</span>
                             @endif
                         </td>
                     </tr>
@@ -419,9 +471,13 @@
                 <span>Menampilkan {{ $jadwal->firstItem() ?? 0 }}–{{ $jadwal->lastItem() ?? 0 }} dari {{ $jadwal->total() }} laporan</span>
                 <div class="pag-btns">
                     @if($jadwal->onFirstPage())
-                        <span class="pag-btn" style="opacity:0.4;">‹</span>
+                        <span class="pag-btn disabled" style="opacity:0.35; cursor:not-allowed;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        </span>
                     @else
-                        <a href="{{ $jadwal->previousPageUrl() }}" class="pag-btn">‹</a>
+                        <a href="{{ $jadwal->previousPageUrl() }}" class="pag-btn">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        </a>
                     @endif
 
                     @for($i = max(1, $jadwal->currentPage()-1); $i <= min($jadwal->lastPage(), $jadwal->currentPage()+2); $i++)
@@ -429,9 +485,13 @@
                     @endfor
 
                     @if($jadwal->hasMorePages())
-                        <a href="{{ $jadwal->nextPageUrl() }}" class="pag-btn">›</a>
+                        <a href="{{ $jadwal->nextPageUrl() }}" class="pag-btn">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </a>
                     @else
-                        <span class="pag-btn" style="opacity:0.4;">›</span>
+                        <span class="pag-btn disabled" style="opacity:0.35; cursor:not-allowed;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </span>
                     @endif
                 </div>
             </div>

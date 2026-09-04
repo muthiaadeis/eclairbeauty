@@ -366,10 +366,16 @@
         tbody tr:hover { background: #FDFAF8; }
 
         .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
+            white-space: nowrap;
+            line-height: 1.2;
             text-transform: uppercase;
         }
         .badge-menunggu { background: #FDF0DC; color: #B8860B; }
