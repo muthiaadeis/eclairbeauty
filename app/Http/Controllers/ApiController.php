@@ -92,7 +92,7 @@ class ApiController extends Controller
                              ->values()
                              ->toArray();
 
-                return response()->json([
+        return response()->json([
             'success' => true,
             'tanggal' => $tanggal,
             'jam_tersedia' => $jamTersedia, // kirim SEMUA slot, jangan difilter lagi
@@ -100,7 +100,7 @@ class ApiController extends Controller
         ]);
     }
 
-        // Booking jadwal baru
+    // Booking jadwal baru
     public function booking(Request $request)
     {
         $pasien = $request->pasien;
@@ -143,8 +143,24 @@ class ApiController extends Controller
             'jadwal' => $jadwal,
         ]);
     }
+
     // Jadwal pasien
     public function jadwalSaya(Request $request)
+    {
+        $pasien = $request->pasien;
+
+        $jadwal = Jadwal::where('pasien_id', $pasien->id)
+                        ->orderBy('tanggal_jadwal', 'desc')
+                        ->get();
+
+        return response()->json([
+            'success' => true,
+            'jadwal' => $jadwal,
+        ]);
+    }
+
+    // Riwayat tindakan pasien
+    public function riwayat(Request $request)
     {
         $pasien = $request->pasien;
 
