@@ -38,14 +38,16 @@
     font-size: 26px; font-weight: 700; color: #3A3A3A;
 }
 
-.two-col { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 24px; }
+.dash-two-col { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 24px; }
 
 .chart-card {
     background: white; border-radius: 16px;
     padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    min-width: 0;
 }
 .chart-header {
     display: flex; justify-content: space-between; align-items: flex-start;
+    flex-wrap: wrap; gap: 8px;
     margin-bottom: 20px;
 }
 .chart-title { font-size: 15px; font-weight: 700; color: #3A3A3A; }
@@ -55,9 +57,11 @@
     background: white; border-radius: 16px;
     padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
     margin-top: 24px;
+    min-width: 0;
 }
 .table-card-header {
     display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 8px;
     margin-bottom: 16px;
 }
 .table-card-title { font-size: 15px; font-weight: 700; color: #3A3A3A; }
@@ -99,6 +103,26 @@
     border-radius: 20px;
     font-size: 12px; color: #6B6B6B;
     display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+}
+
+/* Tabel bisa di-scroll horizontal di layar sempit */
+.table-card-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-card-scroll table { min-width: 460px; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+    .stat-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .dash-two-col { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+    .two-tables { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+    .stat-grid-4 { grid-template-columns: 1fr; }
+    .page-header-row { flex-direction: column; align-items: stretch; }
+    .stat-card { padding: 16px; }
+    .chart-card, .table-card { padding: 16px; }
 }
 @endsection
 
@@ -160,7 +184,7 @@
 </div>
 
 {{-- Chart + Recent --}}
-<div style="display:grid; grid-template-columns:2fr 1fr; gap:20px;">
+<div class="dash-two-col">
 
     {{-- Tren Chart --}}
     <div class="chart-card">
@@ -204,6 +228,7 @@
             <div class="table-card-title">Daftar Janji Temu Terbaru</div>
             <span style="font-size:12px; color:#9B9B9B;">Riwayat operasional 24 jam terakhir</span>
         </div>
+        <div class="table-card-scroll">
         <table class="pemilik-table" style="width:100%; border-collapse:collapse;">
             <thead>
                 <tr>
@@ -250,6 +275,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
     {{-- Pasien Terbaru --}}
@@ -258,6 +284,7 @@
             <div class="table-card-title">Pasien Terbaru</div>
             <a href="{{ route('pemilik.laporan') }}" class="link-lihat">Lihat Semua Laporan →</a>
         </div>
+        <div class="table-card-scroll">
         <table class="pemilik-table" style="width:100%; border-collapse:collapse;">
             <thead>
                 <tr>
@@ -291,6 +318,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 

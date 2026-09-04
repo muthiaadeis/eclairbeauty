@@ -3,7 +3,7 @@
 @section('title', 'Tambah Jadwal - Eclair Beauty Clinic')
 
 @section('extra_style')
-.jadwal-card { max-width: 720px; }
+.jadwal-card { max-width: 720px; margin: 0 auto; }
 .form-group { margin-bottom: 20px; }
 .form-label {
     display: block;

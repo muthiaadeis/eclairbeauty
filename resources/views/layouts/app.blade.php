@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Eclair Beauty Clinic')</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', -apple-system, sans-serif;
             background: #FDF8F4;
@@ -58,6 +64,7 @@
             flex-shrink: 0;
             transition: all 0.2s;
         }
+
         .sidebar-toggle-btn:hover {
             background: #FBF1EC;
             color: #C17B7B;
@@ -80,14 +87,16 @@
             justify-content: center;
             cursor: pointer;
             z-index: 45;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
             transition: all 0.2s;
         }
+
         .sidebar-open-fab:hover {
             background: #FBF1EC;
             color: #C17B7B;
             border-color: #C17B7B;
         }
+
         .app-layout.sidebar-closed .sidebar-open-fab {
             display: flex;
         }
@@ -201,9 +210,10 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.35);
+            background: rgba(0, 0, 0, 0.35);
             z-index: 40;
         }
+
         .app-layout.sidebar-open-mobile .sidebar-backdrop {
             display: block;
         }
@@ -222,8 +232,7 @@
 
         .page-content {
             padding: 32px;
-            max-width: 1100px;
-            margin: 0 auto;
+            width: 100%;
         }
 
         /* Kasih ruang atas biar gak ketiban tombol floating pas sidebar ketutup */
@@ -277,7 +286,10 @@
             gap: 6px;
             transition: background 0.2s;
         }
-        .btn-primary:hover { background: #B86B6B; }
+
+        .btn-primary:hover {
+            background: #B86B6B;
+        }
 
         .btn-secondary {
             padding: 11px 22px;
@@ -295,7 +307,7 @@
             background: #FFFFFF;
             border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
             max-width: 100%;
         }
 
@@ -310,7 +322,7 @@
             background: #FFFFFF;
             border-radius: 16px;
             padding: 22px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
             display: flex;
             align-items: center;
             gap: 16px;
@@ -348,7 +360,13 @@
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
-        table { width: 100%; border-collapse: collapse; min-width: 560px; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 560px;
+        }
+
         thead th {
             text-align: left;
             font-size: 11px;
@@ -358,13 +376,17 @@
             padding: 12px 16px;
             border-bottom: 1px solid #F0E8E2;
         }
+
         tbody td {
             padding: 14px 16px;
             font-size: 14px;
             color: #3A3A3A;
             border-bottom: 1px solid #F8F2EE;
         }
-        tbody tr:hover { background: #FDFAF8; }
+
+        tbody tr:hover {
+            background: #FDFAF8;
+        }
 
         .badge {
             padding: 4px 12px;
@@ -373,12 +395,36 @@
             font-weight: 600;
             text-transform: uppercase;
         }
-        .badge-menunggu { background: #FDF0DC; color: #B8860B; }
-        .badge-hadir { background: #DCEEF5; color: #2C7A9B; }
-        .badge-selesai { background: #DCF0E0; color: #2E8B4F; }
-        .badge-batal { background: #FBE0E0; color: #C0392B; }
-        .badge-aktif { background: #DCF0E0; color: #2E8B4F; }
-        .badge-tidak-aktif { background: #F0F0F0; color: #888; }
+
+        .badge-menunggu {
+            background: #FDF0DC;
+            color: #B8860B;
+        }
+
+        .badge-hadir {
+            background: #DCEEF5;
+            color: #2C7A9B;
+        }
+
+        .badge-selesai {
+            background: #DCF0E0;
+            color: #2E8B4F;
+        }
+
+        .badge-batal {
+            background: #FBE0E0;
+            color: #C0392B;
+        }
+
+        .badge-aktif {
+            background: #DCF0E0;
+            color: #2E8B4F;
+        }
+
+        .badge-tidak-aktif {
+            background: #F0F0F0;
+            color: #888;
+        }
 
         .avatar-initial {
             width: 36px;
@@ -401,6 +447,7 @@
             margin-bottom: 20px;
             font-size: 14px;
         }
+
         .alert-error {
             background: #FBE0E0;
             color: #C0392B;
@@ -417,46 +464,78 @@
             .app-layout:not(.sidebar-open-mobile) .sidebar {
                 transform: translateX(-100%);
             }
+
             .app-layout:not(.sidebar-open-mobile) .main-content {
                 margin-left: 0;
             }
+
             .app-layout:not(.sidebar-open-mobile) .page-content {
                 padding-top: 76px;
             }
+
             .app-layout:not(.sidebar-open-mobile) .sidebar-open-fab {
                 display: flex;
             }
+
             .app-layout.sidebar-open-mobile .sidebar {
                 transform: translateX(0);
-                box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
             }
+
             .app-layout.sidebar-open-mobile .main-content {
                 margin-left: 0;
             }
+
             .app-layout.sidebar-open-mobile .sidebar-open-fab {
                 display: none;
             }
 
-            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         /* Layar kecil / HP */
         @media (max-width: 640px) {
-            .page-content { padding: 16px; }
+            .page-content {
+                padding: 16px;
+            }
+
             .app-layout:not(.sidebar-open-mobile) .page-content {
                 padding-top: 68px;
             }
-            .stat-grid { grid-template-columns: 1fr; }
-            .page-title { font-size: 21px; }
-            .page-header-row { flex-direction: column; align-items: stretch; }
-            .card { padding: 16px; }
-            .sidebar { width: 230px; }
-            .sidebar-open-fab { top: 12px; left: 12px; }
+
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title {
+                font-size: 21px;
+            }
+
+            .page-header-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .sidebar {
+                width: 230px;
+            }
+
+            .sidebar-open-fab {
+                top: 12px;
+                left: 12px;
+            }
         }
 
         @yield('extra_style')
     </style>
 </head>
+
 <body>
     <div class="app-layout" id="appLayout">
 
@@ -465,10 +544,11 @@
 
         <!-- TOMBOL BUKA SIDEBAR (floating, cuma muncul pas sidebar ketutup) -->
         <button class="sidebar-open-fab" id="sidebarOpenBtn" aria-label="Buka sidebar">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <line x1="3" y1="6" x2="21" y2="6"/>
-                <line x1="3" y1="12" x2="21" y2="12"/>
-                <line x1="3" y1="18" x2="21" y2="18"/>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
         </button>
 
@@ -476,10 +556,11 @@
         <aside class="sidebar">
             <div class="sidebar-top-row">
                 <button class="sidebar-toggle-btn" id="sidebarCloseBtn" aria-label="Tutup sidebar">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <line x1="3" y1="6" x2="21" y2="6"/>
-                        <line x1="3" y1="12" x2="21" y2="12"/>
-                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <line x1="3" y1="12" x2="21" y2="12" />
+                        <line x1="3" y1="18" x2="21" y2="18" />
                     </svg>
                 </button>
             </div>
@@ -492,20 +573,31 @@
             <nav class="sidebar-menu">
                 @php $role = session('user_role'); @endphp
 
-                @if($role == 'resepsionis')
-                    <a href="{{ route('resepsionis.dashboard') }}" class="{{ request()->routeIs('resepsionis.dashboard') ? 'active' : '' }}">Dashboard</a>
-                    <a href="{{ route('pasien.index') }}" class="{{ request()->routeIs('pasien.*') ? 'active' : '' }}">Data Pasien</a>
-                    <a href="{{ route('jadwal.index') }}" class="{{ request()->routeIs('jadwal.*') ? 'active' : '' }}">Jadwal</a>
-                    <a href="{{ route('profil.index') }}" class="{{ request()->routeIs('profil.*') ? 'active' : '' }}">Profil</a>
+                @if ($role == 'resepsionis')
+                    <a href="{{ route('resepsionis.dashboard') }}"
+                        class="{{ request()->routeIs('resepsionis.dashboard') ? 'active' : '' }}">Dashboard</a>
+                    <a href="{{ route('pasien.index') }}"
+                        class="{{ request()->routeIs('pasien.*') ? 'active' : '' }}">Data Pasien</a>
+                    <a href="{{ route('jadwal.index') }}"
+                        class="{{ request()->routeIs('jadwal.*') ? 'active' : '' }}">Jadwal</a>
+                    <a href="{{ route('profil.index') }}"
+                        class="{{ request()->routeIs('profil.*') ? 'active' : '' }}">Profil</a>
                 @elseif($role == 'dokter')
-                    <a href="{{ route('dokter.dashboard') }}" class="{{ request()->routeIs('dokter.dashboard') ? 'active' : '' }}">Dashboard</a>
-                    <a href="{{ route('dokter.antrean') }}" class="{{ request()->routeIs('dokter.antrean') ? 'active' : '' }}">Antrean Pasien</a>
-                    <a href="{{ route('rekam_medis.index') }}" class="{{ request()->routeIs('rekam_medis.*') ? 'active' : '' }}">Rekam Medis</a>
-                    <a href="{{ route('profil.index') }}" class="{{ request()->routeIs('profil.*') ? 'active' : '' }}">Profil</a>
+                    <a href="{{ route('dokter.dashboard') }}"
+                        class="{{ request()->routeIs('dokter.dashboard') ? 'active' : '' }}">Dashboard</a>
+                    <a href="{{ route('dokter.antrean') }}"
+                        class="{{ request()->routeIs('dokter.antrean') ? 'active' : '' }}">Antrean Pasien</a>
+                    <a href="{{ route('rekam_medis.index') }}"
+                        class="{{ request()->routeIs('rekam_medis.*') ? 'active' : '' }}">Rekam Medis</a>
+                    <a href="{{ route('profil.index') }}"
+                        class="{{ request()->routeIs('profil.*') ? 'active' : '' }}">Profil</a>
                 @elseif($role == 'pemilik')
-                    <a href="{{ route('pemilik.dashboard') }}" class="{{ request()->routeIs('pemilik.dashboard') ? 'active' : '' }}">Dashboard</a>
-                    <a href="{{ route('pemilik.laporan') }}" class="{{ request()->routeIs('pemilik.laporan') ? 'active' : '' }}">Laporan</a>
-                    <a href="{{ route('profil.index') }}" class="{{ request()->routeIs('profil.*') ? 'active' : '' }}">Profil</a>
+                    <a href="{{ route('pemilik.dashboard') }}"
+                        class="{{ request()->routeIs('pemilik.dashboard') ? 'active' : '' }}">Dashboard</a>
+                    <a href="{{ route('pemilik.laporan') }}"
+                        class="{{ request()->routeIs('pemilik.laporan') ? 'active' : '' }}">Laporan</a>
+                    <a href="{{ route('profil.index') }}"
+                        class="{{ request()->routeIs('profil.*') ? 'active' : '' }}">Profil</a>
                 @endif
             </nav>
 
@@ -519,10 +611,11 @@
                 </div>
             </div>
             <a href="{{ route('logout') }}" class="sidebar-logout">
-                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
                 </svg>
                 Keluar
             </a>
@@ -594,4 +687,5 @@
         })();
     </script>
 </body>
+
 </html>
