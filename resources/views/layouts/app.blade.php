@@ -40,8 +40,8 @@
         .sidebar-top-row {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            padding: 12px 12px 0;
+            justify-content: flex-start;
+            padding: 12px 14px 0;
         }
 
         .sidebar-toggle-btn {
