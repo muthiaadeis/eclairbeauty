@@ -35,6 +35,16 @@
     transition: background 0.2s; white-space: nowrap;
 }
 .btn-filter:hover { background: #B06B6B; }
+.btn-reset {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; background: #FAF6F2; color: #6B6B6B;
+    border: 1px solid #E8DDD5; border-radius: 10px;
+    text-decoration: none; font-size: 13px; font-weight: 500;
+    transition: all 0.2s; white-space: nowrap;
+}
+.btn-reset:hover {
+    background: #F0E8E2; color: #3A3A3A; border-color: #D4C5B9;
+}
 .btn-cetak {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 9px 18px;
@@ -162,18 +172,18 @@
 
 {{-- Filter --}}
 <div class="filter-card">
-    <form method="GET" action="{{ route('pemilik.laporan') }}" class="filter-row">
+    <form method="GET" action="{{ route('pemilik.laporan') }}" class="filter-row" id="filterForm">
         <div class="filter-group">
             <label>Tanggal Mulai</label>
-            <input type="date" name="dari" class="filter-input" value="{{ $dari ?? '' }}">
+            <input type="date" name="dari" class="filter-input" value="{{ $dari ?? '' }}" onchange="this.form.submit()">
         </div>
         <div class="filter-group">
             <label>Tanggal Selesai</label>
-            <input type="date" name="sampai" class="filter-input" value="{{ $sampai ?? '' }}">
+            <input type="date" name="sampai" class="filter-input" value="{{ $sampai ?? '' }}" onchange="this.form.submit()">
         </div>
         <div class="filter-group">
             <label>Status</label>
-            <select name="status" class="filter-input" style="cursor:pointer;">
+            <select name="status" class="filter-input" style="cursor:pointer;" onchange="this.form.submit()">
                 <option value="">Semua Status</option>
                 <option value="menunggu" {{ ($status??'')==='menunggu' ? 'selected' : '' }}>Menunggu</option>
                 <option value="hadir"    {{ ($status??'')==='hadir'    ? 'selected' : '' }}>Dalam Perawatan</option>
@@ -181,14 +191,14 @@
                 <option value="batal"    {{ ($status??'')==='batal'    ? 'selected' : '' }}>Batal</option>
             </select>
         </div>
-        <button type="submit" class="btn-filter">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline; vertical-align:middle; margin-right:4px;">
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-            </svg>
-            Terapkan Filter
-        </button>
         @if(request()->hasAny(['dari','sampai','status']))
-            <a href="{{ route('pemilik.laporan') }}" style="padding:9px 14px; background:#FAF6F2; color:#6B6B6B; border:1px solid #E8DDD5; border-radius:10px; text-decoration:none; font-size:13px;">Reset</a>
+            <a href="{{ route('pemilik.laporan') }}" class="btn-reset">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                </svg>
+                Reset Filter
+            </a>
         @endif
     </form>
 </div>
