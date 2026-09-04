@@ -127,11 +127,6 @@
 
 {{-- Stat Cards --}}
 @php
-    $antrean = \App\Models\Jadwal::with('pasien')
-        ->whereDate('tanggal_jadwal', today())
-        ->whereIn('status_jadwal', ['menunggu', 'hadir', 'selesai'])
-        ->orderBy('jam_jadwal', 'asc')
-        ->get();
     $totalAntrean    = $antrean->count();
     $pasienMenunggu  = $antrean->whereIn('status_jadwal', ['menunggu', 'hadir'])->count();
     $selesaiTindakan = $antrean->where('status_jadwal', 'selesai')->count();
