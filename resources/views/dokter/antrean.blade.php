@@ -151,7 +151,6 @@
                 </td>
                 <td>
                     <div class="patient-name">{{ $j->pasien->nama_pasien ?? '-' }}</div>
-                    <div class="patient-treatment">Treatment: {{ $j->keterangan ?? 'Konsultasi Awal' }}</div>
                 </td>
                 <td>
                     <span class="jam-cell">{{ \Carbon\Carbon::parse($j->jam_jadwal)->format('H:i') }} WIB</span>
