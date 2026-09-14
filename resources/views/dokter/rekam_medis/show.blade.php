@@ -162,6 +162,10 @@
     <div class="alert-success" style="margin-bottom:20px;">✓ {{ session('success') }}</div>
 @endif
 
+@if(session('error'))
+    <div class="alert-success" style="margin-bottom:20px; background:#FBE4DD; color:#B5453F;">⚠ {{ session('error') }}</div>
+@endif
+
 {{-- Kartu Info Pasien --}}
 <div class="pasien-info-card">
     <div style="display:flex; align-items:center; gap:16px;">
@@ -204,12 +208,21 @@
             </svg>
             Kembali
         </a>
-        <a href="{{ route('rekam_medis.create', $pasien->id) }}" class="btn-tambah-rm">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Tambah Rekam Medis
-        </a>
+        @if($sudahCheckin)
+            <a href="{{ route('rekam_medis.create', $pasien->id) }}" class="btn-tambah-rm">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Tambah Rekam Medis
+            </a>
+        @else
+            <span class="btn-tambah-rm" style="opacity:0.45; cursor:not-allowed;" title="Pasien belum check-in resepsionis hari ini">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Belum Check-in
+            </span>
+        @endif
     </div>
 </div>
 

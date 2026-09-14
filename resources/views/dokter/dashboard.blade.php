@@ -227,12 +227,18 @@
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
                                 </svg>
                             </a>
-                        @else
+                        @elseif($j->status_jadwal == 'hadir')
                             <a href="{{ route('rekam_medis.create', $j->pasien_id) }}" class="action-btn action-btn-edit" title="Input rekam medis">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                                 </svg>
                             </a>
+                        @else
+                            <span class="action-btn" style="opacity:0.4; cursor:not-allowed;" title="Menunggu check-in resepsionis">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                </svg>
+                            </span>
                         @endif
                     </td>
                 </tr>

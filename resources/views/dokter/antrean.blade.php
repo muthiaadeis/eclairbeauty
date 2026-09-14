@@ -173,13 +173,20 @@
                             </svg>
                             Lihat Rekam Medis
                         </a>
-                    @else
+                    @elseif($j->status_jadwal == 'hadir')
                         <a href="{{ route('rekam_medis.create', $j->pasien_id) }}" class="btn-mulai-konsultasi">
                             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16"/>
                             </svg>
                             Mulai Konsultasi
                         </a>
+                    @else
+                        <span class="btn-mulai-konsultasi" style="opacity:0.45; cursor:not-allowed; pointer-events:none;" title="Menunggu check-in resepsionis">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            Menunggu Check-in
+                        </span>
                     @endif
                 </td>
             </tr>

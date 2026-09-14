@@ -6,9 +6,21 @@ use Illuminate\Http\Request;
 use App\Models\RekamMedis;
 use App\Models\DokumentasiTindakan;
 use App\Models\Pasien;
+use App\Models\Jadwal;
 
 class RekamMedisController extends Controller
 {
+    // Cek apakah pasien ini sudah di-check-in resepsionis hari ini,
+    // untuk jadwal dengan dokter yang sedang login
+    private function sudahCheckin($pasien_id)
+    {
+        return Jadwal::where('pasien_id', $pasien_id)
+                    ->where('dokter_id', session('user_id'))
+                    ->whereDate('tanggal_jadwal', today())
+                    ->where('status_jadwal', 'hadir')
+                    ->exists();
+    }
+
     // Tampilkan daftar pasien untuk dokter
     public function index(Request $request)
     {
@@ -43,7 +55,10 @@ class RekamMedisController extends Controller
                                 ->orderBy('tanggal_tindakan', 'desc')
                                 ->get();
 
-        return view('dokter.rekam_medis.show', compact('pasien', 'rekamMedis'));
+        // Dipakai di view buat nampilin/nyembunyiin tombol "Tambah Rekam Medis"
+        $sudahCheckin = $this->sudahCheckin($pasien_id);
+
+        return view('dokter.rekam_medis.show', compact('pasien', 'rekamMedis', 'sudahCheckin'));
     }
 
     // Tampilkan form tambah rekam medis
@@ -51,6 +66,12 @@ class RekamMedisController extends Controller
     {
         if(!session('user_id')) return redirect()->route('login');
         if(session('user_role') != 'dokter') return redirect()->route('login');
+
+        // Blokir kalau pasien belum di-check-in resepsionis hari ini
+        if(!$this->sudahCheckin($pasien_id)) {
+            return redirect()->route('rekam_medis.show', $pasien_id)
+                            ->with('error', 'Pasien ini belum check-in oleh resepsionis hari ini, jadi rekam medis belum bisa diisi.');
+        }
 
         $pasien = Pasien::findOrFail($pasien_id);
         return view('dokter.rekam_medis.create', compact('pasien'));
@@ -60,6 +81,13 @@ class RekamMedisController extends Controller
     public function store(Request $request, $pasien_id)
     {
         if(!session('user_id')) return redirect()->route('login');
+        if(session('user_role') != 'dokter') return redirect()->route('login');
+
+        // Blokir juga di sini, jaga-jaga kalau form di-submit manual/lewat request langsung
+        if(!$this->sudahCheckin($pasien_id)) {
+            return redirect()->route('rekam_medis.show', $pasien_id)
+                            ->with('error', 'Pasien ini belum check-in oleh resepsionis hari ini, jadi rekam medis belum bisa diisi.');
+        }
 
         $request->validate([
             'tanggal_tindakan' => 'required|date',
