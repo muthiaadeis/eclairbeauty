@@ -23,6 +23,10 @@ class AuthPasien
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
+        // Kalau token ini terhubung ke data pasien yang sudah digabung
+        // (nonaktif), arahkan ke data pasien yang aktif.
+        $pasien = $pasien->resolveAktif();
+
         $request->merge(['pasien' => $pasien]);
         return $next($request);
     }

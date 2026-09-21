@@ -14,21 +14,38 @@ class ApiController extends Controller
     public function registerPasien(Request $request)
     {
         $request->validate([
-            'google_uid' => 'required',
-            'nama_pasien' => 'required',
+            'google_uid'   => 'required',
+            'nama_pasien'  => 'required',
             'email_google' => 'required|email',
+            // no_hp wajib & harus format nomor Indonesia (08xxxxxxxxxx, 10-13 digit)
+            // supaya no_hp bisa dipakai sebagai identitas asli pasien, bukan cuma placeholder
+            'no_hp'        => ['required', 'regex:/^08[0-9]{8,11}$/'],
+        ], [
+            'no_hp.required' => 'Nomor HP wajib diisi',
+            'no_hp.regex'    => 'Format nomor HP tidak valid (contoh: 081234567890)',
         ]);
 
-        // Cek apakah sudah terdaftar
-        $pasien = Pasien::where('google_uid', $request->google_uid)->first();
+        // Identitas asli pasien adalah no_hp, bukan google_uid,
+        // supaya login pakai akun Google lain tidak dianggap pasien baru.
+        $pasien = Pasien::where('no_hp', $request->no_hp)->first();
 
-        if(!$pasien) {
-            // Buat pasien baru
-            $pasien = Pasien::create([
-                'google_uid' => $request->google_uid,
-                'nama_pasien' => $request->nama_pasien,
+        if ($pasien) {
+            // Kalau data ini sudah pernah digabung ke pasien lain, ikuti ke data aktifnya
+            $pasien = $pasien->resolveAktif();
+
+            // Nomor HP sudah terdaftar -> tautkan akun Google yang baru login
+            // ke data pasien yang sama (bukan bikin data baru).
+            $pasien->update([
+                'google_uid'   => $request->google_uid,
                 'email_google' => $request->email_google,
-                'no_hp' => $request->no_hp ?? 'google_'.$request->google_uid,
+            ]);
+        } else {
+            // Nomor HP belum pernah dipakai -> pasien baru
+            $pasien = Pasien::create([
+                'google_uid'   => $request->google_uid,
+                'nama_pasien'  => $request->nama_pasien,
+                'email_google' => $request->email_google,
+                'no_hp'        => $request->no_hp,
             ]);
         }
 
@@ -52,6 +69,10 @@ class ApiController extends Controller
             ], 404);
         }
 
+        // Kalau akun Google ini terhubung ke data yang sudah digabung
+        // (nonaktif), arahkan diam-diam ke data pasien yang aktif.
+        $pasien = $pasien->resolveAktif();
+
         return response()->json([
             'success' => true,
             'pasien' => $pasien,
@@ -73,7 +94,6 @@ class ApiController extends Controller
     {
         $tanggal = $request->get('tanggal', date('Y-m-d'));
 
-        // Semua slot jam yang ada
         $jamTersedia = [
             '09:00', '09:30', '10:00', '10:30',
             '11:00', '11:30', '13:00', '13:30',
@@ -81,7 +101,6 @@ class ApiController extends Controller
             '16:00', '16:30', '17:00'
         ];
 
-        // Jam yang sudah terpakai (buat ditandai abu-abu, BUKAN dibuang dari daftar)
         $jamTerpakai = Jadwal::where('tanggal_jadwal', $tanggal)
                              ->where('status_jadwal', '!=', 'batal')
                              ->pluck('jam_jadwal')
@@ -95,7 +114,7 @@ class ApiController extends Controller
         return response()->json([
             'success' => true,
             'tanggal' => $tanggal,
-            'jam_tersedia' => $jamTersedia, // kirim SEMUA slot, jangan difilter lagi
+            'jam_tersedia' => $jamTersedia,
             'jam_penuh' => $jamTerpakai,
         ]);
     }
@@ -110,9 +129,15 @@ class ApiController extends Controller
             'jam_jadwal' => 'required',
         ]);
 
-        // Cek apakah jam masih tersedia
+        // Auto-assign ke dokter yang ada (saat ini baru 1 dokter aktif)
+        $dokter = User::where('role', 'dokter')
+                      ->where('status_aktif', true)
+                      ->first();
+
+        // Cek apakah jam masih tersedia untuk dokter ini
         $cek = Jadwal::where('tanggal_jadwal', $request->tanggal_jadwal)
                      ->where('jam_jadwal', $request->jam_jadwal)
+                     ->where('dokter_id', $dokter?->id)
                      ->where('status_jadwal', '!=', 'batal')
                      ->first();
 
@@ -123,10 +148,11 @@ class ApiController extends Controller
             ], 400);
         }
 
-        // Auto-assign ke dokter yang ada (saat ini baru 1 dokter aktif)
-        $dokter = User::where('role', 'dokter')
-                      ->where('status_aktif', true)
-                      ->first();
+        // Lengkapi tanggal lahir dari form booking kalau belum terisi
+        // (no_hp sudah pasti benar sejak registrasi, jadi tidak perlu disentuh lagi)
+        if ($request->filled('tanggal_lahir') && !$pasien->tanggal_lahir) {
+            $pasien->update(['tanggal_lahir' => $request->tanggal_lahir]);
+        }
 
         $jadwal = Jadwal::create([
             'pasien_id' => $pasien->id,
@@ -172,6 +198,7 @@ class ApiController extends Controller
                                  return [
                                      'id' => $rm->id,
                                      'tanggal_tindakan' => $rm->tanggal_tindakan,
+                                     'jenis_tindakan' => $rm->jenis_tindakan,
                                      'catatan_tindakan' => $rm->catatan_tindakan,
                                      'tanggal_kontrol' => $rm->tanggal_kontrol,
                                      'foto_before' => $rm->dokumentasi->first()?->foto_before

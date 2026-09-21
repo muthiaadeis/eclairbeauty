@@ -16,11 +16,29 @@ class Pasien extends Model
         'alamat',
         'tanggal_lahir',
         'jenis_kelamin',
+        'is_aktif',
+        'merged_ke_id',
     ];
 
     // Relasi ke jadwal
     public function jadwal()
     {
         return $this->hasMany(Jadwal::class, 'pasien_id');
+    }
+
+    // Kalau data ini nonaktif (hasil merge), ini pasien tujuannya
+    public function mergedKe()
+    {
+        return $this->belongsTo(Pasien::class, 'merged_ke_id');
+    }
+
+    // Ikuti rantai merge sampai ke data pasien yang aktif
+    public function resolveAktif()
+    {
+        $pasien = $this;
+        while (!$pasien->is_aktif && $pasien->merged_ke_id) {
+            $pasien = $pasien->mergedKe;
+        }
+        return $pasien;
     }
 }

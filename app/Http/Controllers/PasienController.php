@@ -17,7 +17,7 @@ class PasienController extends Controller
         $search = $request->get('search');
         $sort   = $request->get('sort', 'terbaru');
 
-        $query = Pasien::with('jadwal');
+        $query = Pasien::with('jadwal')->where('is_aktif', true);
 
         if($search) {
             $query->where(function($q) use ($search) {
@@ -64,7 +64,7 @@ class PasienController extends Controller
     public function show($id)
     {
         if(!session('user_id')) return redirect()->route('login');
-        $pasien = Pasien::with('jadwal')->findOrFail($id);
+        $pasien = Pasien::with('jadwal', 'mergedKe')->findOrFail($id);
         return view('resepsionis.pasien.show', compact('pasien'));
     }
 
@@ -72,6 +72,12 @@ class PasienController extends Controller
     {
         if(!session('user_id')) return redirect()->route('login');
         $pasien = Pasien::findOrFail($id);
+
+        if(!$pasien->is_aktif) {
+            return redirect()->route('pasien.show', $id)
+                ->with('error', 'Data pasien ini sudah digabung ke pasien lain dan tidak bisa diedit lagi.');
+        }
+
         return view('resepsionis.pasien.edit', compact('pasien'));
     }
 
@@ -100,7 +106,73 @@ class PasienController extends Controller
     public function destroy($id)
     {
         if(!session('user_id')) return redirect()->route('login');
-        Pasien::findOrFail($id)->delete();
-        return redirect()->route('pasien.index')->with('success', 'Data pasien berhasil dihapus!');
+
+        $pasien = Pasien::findOrFail($id);
+        $pasien->update(['is_aktif' => false]);
+
+        return redirect()->route('pasien.index')
+                        ->with('success', 'Data pasien berhasil dinonaktifkan!');
+    }
+
+    // Form untuk menggabungkan data pasien duplikat (mis. karena typo no HP saat registrasi)
+    public function mergeForm($id)
+    {
+        if(!session('user_id')) return redirect()->route('login');
+
+        $pasien = Pasien::findOrFail($id);
+
+        if(!$pasien->is_aktif) {
+            return redirect()->route('pasien.show', $id)
+                ->with('error', 'Data pasien ini sudah nonaktif (hasil merge sebelumnya), tidak bisa dijadikan tujuan penggabungan lagi.');
+        }
+
+        // Kandidat duplikat: pasien lain yang masih aktif dengan nama mirip,
+        // biar gampang dicari resepsionis
+        $kandidat = Pasien::where('id', '!=', $id)
+            ->where('is_aktif', true)
+            ->where('nama_pasien', 'like', '%'.$pasien->nama_pasien.'%')
+            ->get();
+
+        return view('resepsionis.pasien.merge', compact('pasien', 'kandidat'));
+    }
+
+    // Eksekusi penggabungan: seluruh jadwal & rekam medis dari data duplikat
+    // dipindahkan ke data pasien tujuan ($id). Data duplikat TIDAK dihapus
+    // (rekam medis wajib disimpan sesuai UU Rekam Medis), hanya dinonaktifkan
+    // supaya tidak bisa dipakai lagi untuk input data baru.
+    public function merge(Request $request, $id)
+    {
+        if(!session('user_id')) return redirect()->route('login');
+
+        $request->validate([
+            'duplikat_id' => 'required|exists:pasien,id|different:id',
+        ]);
+
+        $tujuan   = Pasien::findOrFail($id);
+        $duplikat = Pasien::findOrFail($request->duplikat_id);
+
+        if ($tujuan->id === $duplikat->id) {
+            return back()->with('error', 'Tidak bisa menggabungkan data pasien dengan dirinya sendiri.');
+        }
+
+        if (!$tujuan->is_aktif || !$duplikat->is_aktif) {
+            return back()->with('error', 'Salah satu data sudah nonaktif (pernah digabung sebelumnya). Pilih data yang masih aktif.');
+        }
+
+        \DB::transaction(function () use ($tujuan, $duplikat) {
+            $duplikat->jadwal()->update(['pasien_id' => $tujuan->id]);
+            \App\Models\RekamMedis::where('pasien_id', $duplikat->id)
+                ->update(['pasien_id' => $tujuan->id]);
+
+            // Nonaktifkan, jangan dihapus — riwayat rekam medis lama
+            // (jika ada yang tercatat sebelum digabung) tetap tersimpan.
+            $duplikat->update([
+                'is_aktif'     => false,
+                'merged_ke_id' => $tujuan->id,
+            ]);
+        });
+
+        return redirect()->route('pasien.show', $tujuan->id)
+            ->with('success', "Data pasien '{$duplikat->nama_pasien}' berhasil digabung ke akun ini. Data lama dinonaktifkan, bukan dihapus.");
     }
 }

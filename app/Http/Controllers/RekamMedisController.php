@@ -67,13 +67,20 @@ class RekamMedisController extends Controller
         if(!session('user_id')) return redirect()->route('login');
         if(session('user_role') != 'dokter') return redirect()->route('login');
 
+        $pasien = Pasien::findOrFail($pasien_id);
+
+        // Blokir kalau data pasien ini sudah digabung/dinonaktifkan
+        if(!$pasien->is_aktif) {
+            return redirect()->route('rekam_medis.show', $pasien_id)
+                            ->with('error', 'Data pasien ini sudah digabung ke data pasien lain, rekam medis tidak bisa ditambahkan di sini lagi.');
+        }
+
         // Blokir kalau pasien belum di-check-in resepsionis hari ini
         if(!$this->sudahCheckin($pasien_id)) {
             return redirect()->route('rekam_medis.show', $pasien_id)
                             ->with('error', 'Pasien ini belum check-in oleh resepsionis hari ini, jadi rekam medis belum bisa diisi.');
         }
 
-        $pasien = Pasien::findOrFail($pasien_id);
         return view('dokter.rekam_medis.create', compact('pasien'));
     }
 
@@ -83,7 +90,13 @@ class RekamMedisController extends Controller
         if(!session('user_id')) return redirect()->route('login');
         if(session('user_role') != 'dokter') return redirect()->route('login');
 
-        // Blokir juga di sini, jaga-jaga kalau form di-submit manual/lewat request langsung
+        $pasien = Pasien::findOrFail($pasien_id);
+
+        if(!$pasien->is_aktif) {
+            return redirect()->route('rekam_medis.show', $pasien_id)
+                            ->with('error', 'Data pasien ini sudah digabung ke data pasien lain, rekam medis tidak bisa ditambahkan di sini lagi.');
+        }
+
         if(!$this->sudahCheckin($pasien_id)) {
             return redirect()->route('rekam_medis.show', $pasien_id)
                             ->with('error', 'Pasien ini belum check-in oleh resepsionis hari ini, jadi rekam medis belum bisa diisi.');
@@ -91,9 +104,11 @@ class RekamMedisController extends Controller
 
         $request->validate([
             'tanggal_tindakan' => 'required|date',
+            'jenis_perawatan' => 'nullable|string',
             'keluhan' => 'nullable|string',
             'hasil_konsultasi' => 'nullable|string',
             'catatan_tindakan' => 'nullable|string',
+            'produk_digunakan' => 'nullable|string',
             'tanggal_kontrol' => 'nullable|date',
             'foto_before' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'foto_after' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -104,14 +119,15 @@ class RekamMedisController extends Controller
             'pasien_id' => $pasien_id,
             'user_id' => session('user_id'),
             'tanggal_tindakan' => $request->tanggal_tindakan,
+            'jenis_tindakan' => $request->jenis_perawatan,
             'keluhan' => $request->keluhan,
             'hasil_konsultasi' => $request->hasil_konsultasi,
             'catatan_tindakan' => $request->catatan_tindakan,
+            'produk_digunakan' => $request->produk_digunakan,
             'tanggal_kontrol' => $request->tanggal_kontrol,
             'created_at' => now(),
         ]);
 
-        // Upload foto before & after
         $fotoBefore = null;
         $fotoAfter = null;
 
@@ -125,7 +141,6 @@ class RekamMedisController extends Controller
                                  ->store('foto_tindakan', 'public');
         }
 
-        // Simpan dokumentasi kalau ada foto
         if($fotoBefore || $fotoAfter) {
             DokumentasiTindakan::create([
                 'rekam_medis_id' => $rekamMedis->id,

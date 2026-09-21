@@ -75,6 +75,8 @@ Route::get('/pasien/{id}', [PasienController::class, 'show'])->name('pasien.show
 Route::get('/pasien/{id}/edit', [PasienController::class, 'edit'])->name('pasien.edit');
 Route::put('/pasien/{id}', [PasienController::class, 'update'])->name('pasien.update');
 Route::delete('/pasien/{id}', [PasienController::class, 'destroy'])->name('pasien.destroy');
+Route::get('/pasien/{id}/merge', [PasienController::class, 'mergeForm'])->name('pasien.merge.form');
+Route::post('/pasien/{id}/merge', [PasienController::class, 'merge'])->name('pasien.merge');
 
 // Jadwal
 Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');

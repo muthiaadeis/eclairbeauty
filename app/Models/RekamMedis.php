@@ -14,9 +14,11 @@ class RekamMedis extends Model
         'pasien_id',
         'user_id',
         'tanggal_tindakan',
+        'jenis_tindakan',
         'keluhan',
         'hasil_konsultasi',
         'catatan_tindakan',
+        'produk_digunakan',
         'tanggal_kontrol',
     ];
 
