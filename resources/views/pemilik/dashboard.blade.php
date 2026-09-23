@@ -183,34 +183,31 @@
     </div>
 </div>
 
-{{-- Chart + Recent --}}
-<div class="dash-two-col">
-
-    {{-- Tren Chart --}}
-    <div class="chart-card">
+    {{-- Chart Gabungan --}}
+    <div class="chart-card" style="margin-top: 24px;">
         <div class="chart-header">
             <div>
-                <div class="chart-title">Tren Janji Temu</div>
-                <div class="chart-subtitle">Statistik kunjungan operasional harian</div>
+                <div class="chart-title">Statistik Klinik</div>
+                <div class="chart-subtitle" id="chartSubtitle">Statistik kunjungan operasional harian</div>
             </div>
-            <span class="periode-chip">7 Hari Terakhir ↑</span>
-        </div>
-        <canvas id="grafikKunjungan" height="120"></canvas>
-    </div>
-
-    {{-- Treatment Terbanyak --}}
-    <div class="chart-card" style="display:flex; flex-direction:column;">
-        <div class="chart-header" style="margin-bottom: 10px;">
             <div>
-                <div class="chart-title">Treatment Terbanyak</div>
-                <div class="chart-subtitle">Tindakan paling sering dilakukan</div>
+                <select id="chartSelector" onchange="toggleChart()" style="padding: 8px 16px; border-radius: 20px; border: 1px solid #F0E8E2; background: #FAF6F2; color: #6B6B6B; font-size: 13px; outline: none; cursor: pointer; font-family: inherit;">
+                    <option value="kunjungan">Tren Janji Temu</option>
+                    <option value="treatment">Treatment Terbanyak</option>
+                </select>
             </div>
         </div>
-        <div style="position: relative; flex: 1; min-height: 250px; display: flex; align-items: center; justify-content: center;">
+
+        {{-- Container Tren Kunjungan --}}
+        <div id="containerKunjungan">
+            <canvas id="grafikKunjungan" height="100"></canvas>
+        </div>
+
+        {{-- Container Treatment --}}
+        <div id="containerTreatment" style="display: none; position: relative; height: 350px; width: 100%; align-items: center; justify-content: center;">
             <canvas id="grafikTreatment"></canvas>
         </div>
     </div>
-</div>
 
 {{-- Two tables --}}
 <div class="two-tables">
@@ -409,5 +406,24 @@
             cutout: '65%'
         }
     });
+</script>
+
+<script>
+    function toggleChart() {
+        const selector = document.getElementById('chartSelector').value;
+        const containerKunjungan = document.getElementById('containerKunjungan');
+        const containerTreatment = document.getElementById('containerTreatment');
+        const chartSubtitle = document.getElementById('chartSubtitle');
+
+        if (selector === 'kunjungan') {
+            containerKunjungan.style.display = 'block';
+            containerTreatment.style.display = 'none';
+            chartSubtitle.textContent = 'Statistik kunjungan operasional harian';
+        } else {
+            containerKunjungan.style.display = 'none';
+            containerTreatment.style.display = 'flex';
+            chartSubtitle.textContent = 'Tindakan paling sering dilakukan';
+        }
+    }
 </script>
 @endsection
