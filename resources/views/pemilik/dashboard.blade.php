@@ -217,16 +217,14 @@
             </a>
         </div>
         {{-- Treatment Terbanyak --}}
-        <div class="chart-card" style="display:flex; flex-direction:column;">
-            <div class="chart-title" style="margin-bottom:14px;">Treatment Terbanyak</div>
-            @forelse($treatmentTerbanyak as $t)
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #F2E9E4;">
-                    <span style="font-size:13px; color:#3A3A3A;">{{ $t->jenis_tindakan }}</span>
-                    <span style="font-size:13px; font-weight:700; color:#C17B7B;">{{ $t->total }}x</span>
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">Treatment Terbanyak</div>
+                    <div class="chart-subtitle">Jenis tindakan paling sering dilakukan</div>
                 </div>
-            @empty
-                <div style="text-align:center; padding:24px; color:#9B9B9B; font-size:13px;">Belum ada data tindakan</div>
-            @endforelse
+            </div>
+            <canvas id="grafikTreatment" height="120"></canvas>
         </div>
     </div>
 </div>
@@ -380,6 +378,32 @@
                     grid: { display: false },
                     ticks: { color: '#9B9B9B', font: { size: 11 } }
                 }
+            }
+        }
+    });
+</script>
+
+<script>
+    const labelTreatment = @json($treatmentTerbanyak->pluck('jenis_tindakan'));
+    const dataTreatment  = @json($treatmentTerbanyak->pluck('total'));
+
+    new Chart(document.getElementById('grafikTreatment'), {
+        type: 'bar',
+        data: {
+            labels: labelTreatment,
+            datasets: [{
+                label: 'Jumlah Tindakan',
+                data: dataTreatment,
+                backgroundColor: '#C17B7B',
+                borderRadius: 8,
+            }]
+        },
+        options: {
+            indexAxis: 'y', // horizontal bar, biar nama treatment yang panjang gak kepotong
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { beginAtZero: true, ticks: { stepSize: 1 } }
             }
         }
     });
