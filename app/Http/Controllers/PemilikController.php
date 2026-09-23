@@ -60,7 +60,8 @@ class PemilikController extends Controller
             'kunjunganPerBulan',
             'labelBulan',
             'jadwalTerbaru',
-            'pasienTerbaru'
+            'pasienTerbaru',
+            'treatmentTerbanyak'
         ));
     }
 
