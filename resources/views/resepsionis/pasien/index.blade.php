@@ -62,13 +62,54 @@
     display: flex; align-items: center; gap: 8px;
     font-size: 0.82rem; color: #6B7280;
 }
-.sort-box select {
-    padding: 0.45rem 0.75rem;
-    border: 1px solid #E5E7EB; border-radius: 8px;
-    font-size: 0.82rem; color: #374151;
-    background: #fff; outline: none; cursor: pointer;
+/* ── Custom Dropdown ── */
+.custom-dropdown {
+    position: relative;
+    display: inline-block;
+    user-select: none;
 }
-.sort-box select:focus { border-color: #C17B7B; }
+.custom-dropdown-btn {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 0.5rem 1rem;
+    background: #FAF6F2;
+    border: 1px solid #F0E8E2;
+    border-radius: 20px;
+    font-size: 0.82rem; color: #6B6B6B; font-weight: 500;
+    cursor: pointer;
+    min-width: 120px;
+    transition: all 0.2s;
+}
+.custom-dropdown-btn:hover { border-color: #C17B7B; background: #FFF; }
+.custom-dropdown-btn.open { border-color: #C17B7B; background: #FFF; box-shadow: 0 0 0 3px rgba(193,123,123,0.1); }
+.custom-dropdown-btn svg { width: 14px; height: 14px; transition: transform 0.2s; color: #9B9B9B; }
+.custom-dropdown-btn.open svg { transform: rotate(180deg); }
+
+.custom-dropdown-menu {
+    position: absolute; top: calc(100% + 6px); right: 0;
+    background: #FFF;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    border: 1px solid #F0E8E2;
+    min-width: 150px;
+    z-index: 50;
+    opacity: 0; visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s;
+    overflow: hidden;
+}
+.custom-dropdown-menu.show {
+    opacity: 1; visibility: visible;
+    transform: translateY(0);
+}
+.cd-item {
+    display: block; width: 100%; text-align: left;
+    padding: 10px 14px; border: none; background: none;
+    font-size: 0.82rem; color: #3A3A3A; font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.cd-item:hover { background: #FAF6F2; color: #C17B7B; }
+.cd-item.selected { font-weight: 600; color: #C17B7B; background: #FAF6F2; }
 
 /* ── Table card ── */
 .pasien-card {
@@ -230,17 +271,44 @@
 
     <div class="sort-box">
         Status:
-        <select name="status" onchange="document.getElementById('filterForm').submit()">
-            <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua</option>
-            <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-            <option value="tidak_aktif" {{ request('status') == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
-        </select>
+        <div class="custom-dropdown" id="dropdownStatus">
+            <input type="hidden" name="status" id="inputStatus" value="{{ request('status', 'semua') }}">
+            <div class="custom-dropdown-btn" onclick="toggleCustomDropdown('dropdownStatus')">
+                <span id="textStatus">
+                    @if(request('status') == 'aktif') Aktif
+                    @elseif(request('status') == 'tidak_aktif') Tidak Aktif
+                    @else Semua @endif
+                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
+            <div class="custom-dropdown-menu">
+                <button type="button" class="cd-item {{ request('status', 'semua') == 'semua' ? 'selected' : '' }}" onclick="selectCustomDropdown('Status', 'semua', 'Semua')">Semua</button>
+                <button type="button" class="cd-item {{ request('status') == 'aktif' ? 'selected' : '' }}" onclick="selectCustomDropdown('Status', 'aktif', 'Aktif')">Aktif</button>
+                <button type="button" class="cd-item {{ request('status') == 'tidak_aktif' ? 'selected' : '' }}" onclick="selectCustomDropdown('Status', 'tidak_aktif', 'Tidak Aktif')">Tidak Aktif</button>
+            </div>
+        </div>
+
         Urutkan:
-        <select name="sort" onchange="document.getElementById('filterForm').submit()">
-            <option value="terbaru" {{ request('sort','terbaru') == 'terbaru' ? 'selected' : '' }}>Terbaru</option>
-            <option value="terlama" {{ request('sort') == 'terlama'  ? 'selected' : '' }}>Terlama</option>
-            <option value="nama"    {{ request('sort') == 'nama'     ? 'selected' : '' }}>Nama A–Z</option>
-        </select>
+        <div class="custom-dropdown" id="dropdownSort">
+            <input type="hidden" name="sort" id="inputSort" value="{{ request('sort', 'terbaru') }}">
+            <div class="custom-dropdown-btn" onclick="toggleCustomDropdown('dropdownSort')">
+                <span id="textSort">
+                    @if(request('sort') == 'terlama') Terlama
+                    @elseif(request('sort') == 'nama') Nama A–Z
+                    @else Terbaru @endif
+                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
+            <div class="custom-dropdown-menu">
+                <button type="button" class="cd-item {{ request('sort', 'terbaru') == 'terbaru' ? 'selected' : '' }}" onclick="selectCustomDropdown('Sort', 'terbaru', 'Terbaru')">Terbaru</button>
+                <button type="button" class="cd-item {{ request('sort') == 'terlama' ? 'selected' : '' }}" onclick="selectCustomDropdown('Sort', 'terlama', 'Terlama')">Terlama</button>
+                <button type="button" class="cd-item {{ request('sort') == 'nama' ? 'selected' : '' }}" onclick="selectCustomDropdown('Sort', 'nama', 'Nama A–Z')">Nama A–Z</button>
+            </div>
+        </div>
         <input type="hidden" name="search" value="{{ request('search') ?? '' }}">
     </div>
 </div>
@@ -319,14 +387,12 @@
                         </td>
                         <td>
                             <div class="aksi-cell">
-                                <a href="{{ route('pasien.show', $p->id) }}" class="btn-icon view" title="Lihat Detail">
                                 <a href="{{ route('pasien.show', $p->id) }}" class="btn-icon view" title="Lihat Detail" onclick="event.stopPropagation()">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
                                 </a>
-                                <a href="{{ route('pasien.edit', $p->id) }}" class="btn-icon edit" title="Edit">
                                 <a href="{{ route('pasien.edit', $p->id) }}" class="btn-icon edit" title="Edit" onclick="event.stopPropagation()">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -384,5 +450,45 @@
         </div>
     @endif
 </div>
+@endsection
 
+@section('scripts')
+<script>
+    function toggleCustomDropdown(id) {
+        // Close others
+        document.querySelectorAll('.custom-dropdown-btn').forEach(btn => {
+            if (btn.parentElement.id !== id) {
+                btn.classList.remove('open');
+                btn.nextElementSibling.classList.remove('show');
+            }
+        });
+
+        const wrapper = document.getElementById(id);
+        const btn = wrapper.querySelector('.custom-dropdown-btn');
+        const menu = wrapper.querySelector('.custom-dropdown-menu');
+
+        btn.classList.toggle('open');
+        menu.classList.toggle('show');
+    }
+
+    function selectCustomDropdown(type, value, text) {
+        document.getElementById('input' + type).value = value;
+        document.getElementById('text' + type).innerText = text;
+
+        const wrapper = document.getElementById('dropdown' + type);
+        wrapper.querySelector('.custom-dropdown-btn').classList.remove('open');
+        wrapper.querySelector('.custom-dropdown-menu').classList.remove('show');
+
+        // Auto submit
+        document.getElementById('filterForm').submit();
+    }
+
+    // Close when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.custom-dropdown')) {
+            document.querySelectorAll('.custom-dropdown-btn').forEach(btn => btn.classList.remove('open'));
+            document.querySelectorAll('.custom-dropdown-menu').forEach(menu => menu.classList.remove('show'));
+        }
+    });
+</script>
 @endsection
