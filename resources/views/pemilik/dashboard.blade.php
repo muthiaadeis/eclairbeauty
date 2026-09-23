@@ -198,33 +198,16 @@
         <canvas id="grafikKunjungan" height="120"></canvas>
     </div>
 
-    {{-- Layanan Terpopuler placeholder --}}
+    {{-- Treatment Terbanyak --}}
     <div class="chart-card" style="display:flex; flex-direction:column;">
-        <div>
-            <div class="chart-title">Total Kunjungan</div>
-        </div>
-        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
-            <div style="font-size:48px; font-weight:800; color:#C17B7B; line-height:1;">
-                {{ number_format($totalKunjungan) }}
+        <div class="chart-header" style="margin-bottom: 10px;">
+            <div>
+                <div class="chart-title">Treatment Terbanyak</div>
+                <div class="chart-subtitle">Tindakan paling sering dilakukan</div>
             </div>
-            <div style="font-size:12px; color:#9B9B9B; text-transform:uppercase; letter-spacing:0.5px;">Total Kunjungan</div>
-            <a href="{{ route('pemilik.laporan') }}" style="margin-top:12px; display:inline-flex; align-items:center; gap:6px; padding:10px 20px; background:#C17B7B; color:white; border-radius:10px; text-decoration:none; font-size:13px; font-weight:600;">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                </svg>
-                Lihat Laporan
-            </a>
         </div>
-        {{-- Treatment Terbanyak --}}
-        <div class="chart-card">
-            <div class="chart-header">
-                <div>
-                    <div class="chart-title">Treatment Terbanyak</div>
-                    <div class="chart-subtitle">Jenis tindakan paling sering dilakukan</div>
-                </div>
-            </div>
-            <canvas id="grafikTreatment" height="120"></canvas>
+        <div style="position: relative; flex: 1; min-height: 250px; display: flex; align-items: center; justify-content: center;">
+            <canvas id="grafikTreatment"></canvas>
         </div>
     </div>
 </div>
@@ -388,23 +371,42 @@
     const dataTreatment  = @json($treatmentTerbanyak->pluck('total'));
 
     new Chart(document.getElementById('grafikTreatment'), {
-        type: 'bar',
+        type: 'doughnut',
         data: {
             labels: labelTreatment,
             datasets: [{
-                label: 'Jumlah Tindakan',
                 data: dataTreatment,
-                backgroundColor: '#C17B7B',
-                borderRadius: 8,
+                backgroundColor: [
+                    '#C17B7B', // Rose
+                    '#2C7A9B', // Blue
+                    '#B8860B', // Amber
+                    '#5B8B6C', // Green
+                    '#9B7293'  // Purple/Plum
+                ],
+                borderWidth: 0,
+                hoverOffset: 4
             }]
         },
         options: {
-            indexAxis: 'y', // horizontal bar, biar nama treatment yang panjang gak kepotong
             responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { beginAtZero: true, ticks: { stepSize: 1 } }
-            }
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 15,
+                        font: { size: 11, family: "'Inter', sans-serif" },
+                        color: '#6B6B6B'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#3A3A3A',
+                    padding: 10,
+                    cornerRadius: 8,
+                }
+            },
+            cutout: '65%'
         }
     });
 </script>
