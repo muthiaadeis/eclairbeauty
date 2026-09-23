@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Pasien;
 use App\Models\Jadwal;
+use Illuminate\Support\Facades\DB;
 
 class PemilikController extends Controller
 {
@@ -42,6 +43,14 @@ class PemilikController extends Controller
         $pasienTerbaru = Pasien::orderBy('created_at', 'desc')
                                ->limit(5)
                                ->get();
+
+        $treatmentTerbanyak = \App\Models\RekamMedis::select('jenis_tindakan', DB::raw('count(*) as total'))
+                                ->whereNotNull('jenis_tindakan')
+                                ->where('jenis_tindakan', '!=', '')
+                                ->groupBy('jenis_tindakan')
+                                ->orderByDesc('total')
+                                ->limit(5)
+                                ->get();
 
         return view('pemilik.dashboard', compact(
             'totalPasien',

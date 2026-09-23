@@ -128,6 +128,19 @@ class RekamMedisController extends Controller
             'created_at' => now(),
         ]);
 
+        // Kalau dokter isi tanggal_kontrol, langsung bikinkan entri jadwal
+        // baru biar muncul di "Jadwal Saya" pasien & antrean dokter, bukan cuma tercatat sebagai teks.
+        if ($request->filled('tanggal_kontrol')) {
+            \App\Models\Jadwal::create([
+                'pasien_id'      => $pasien_id,
+                'dokter_id'      => session('user_id'),
+                'tanggal_jadwal' => $request->tanggal_kontrol,
+                'jam_jadwal'     => '09:00',
+                'status_jadwal'  => 'menunggu',
+                'keterangan'     => 'Jadwal kontrol lanjutan otomatis dari rekam medis #'.$rekamMedis->id,
+            ]);
+        }
+
         $fotoBefore = null;
         $fotoAfter = null;
 

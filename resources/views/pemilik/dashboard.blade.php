@@ -216,6 +216,18 @@
                 Lihat Laporan
             </a>
         </div>
+        {{-- Treatment Terbanyak --}}
+        <div class="chart-card" style="display:flex; flex-direction:column;">
+            <div class="chart-title" style="margin-bottom:14px;">Treatment Terbanyak</div>
+            @forelse($treatmentTerbanyak as $t)
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #F2E9E4;">
+                    <span style="font-size:13px; color:#3A3A3A;">{{ $t->jenis_tindakan }}</span>
+                    <span style="font-size:13px; font-weight:700; color:#C17B7B;">{{ $t->total }}x</span>
+                </div>
+            @empty
+                <div style="text-align:center; padding:24px; color:#9B9B9B; font-size:13px;">Belum ada data tindakan</div>
+            @endforelse
+        </div>
     </div>
 </div>
 

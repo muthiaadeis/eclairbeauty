@@ -7,6 +7,7 @@ use App\Models\Pasien;
 use App\Models\Jadwal;
 use App\Models\RekamMedis;
 use App\Models\User;
+use App\Models\NotifikasiLog;
 
 class ApiController extends Controller
 {
@@ -52,7 +53,7 @@ class ApiController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Login berhasil',
-            'pasien' => $pasien,
+            'pasien' => $this->formatPasien($pasien),
             'token' => $request->google_uid,
         ]);
     }
@@ -214,5 +215,36 @@ class ApiController extends Controller
             'success' => true,
             'riwayat' => $riwayat,
         ]);
+    }
+
+    // Tambahin method private ini di dalam class ApiController
+    private function formatPasien($pasien)
+    {
+        return [
+            'id'            => $pasien->id,
+            'nama'          => $pasien->nama_pasien,
+            'email'         => $pasien->email_google,
+            'nomor_hp'      => $pasien->no_hp,
+            'tanggal_lahir' => $pasien->tanggal_lahir,
+            'alamat'        => $pasien->alamat,
+        ];
+    }
+
+    public function simpanFcmToken(Request $request)
+    {
+        $request->validate(['fcm_token' => 'required|string']);
+        $request->pasien->update(['fcm_token' => $request->fcm_token]);
+
+        return response()->json(['success' => true, 'message' => 'Token tersimpan']);
+    }
+
+    public function riwayatNotifikasi(Request $request)
+    {
+        $notifikasi = NotifikasiLog::where('pasien_id', $request->pasien->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(30)
+            ->get();
+
+        return response()->json(['success' => true, 'notifikasi' => $notifikasi]);
     }
 }

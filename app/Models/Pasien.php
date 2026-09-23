@@ -18,6 +18,7 @@ class Pasien extends Model
         'jenis_kelamin',
         'is_aktif',
         'merged_ke_id',
+        'fcm_token'
     ];
 
     // Relasi ke jadwal
