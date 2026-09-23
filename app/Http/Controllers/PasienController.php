@@ -26,8 +26,21 @@ class PasienController extends Controller
             });
         }
 
-        $query->orderBy('created_at', $sort === 'terlama' ? 'asc' : 'desc');
-        if($sort === 'nama') $query->reorder()->orderBy('nama_pasien', 'asc');
+        $status = $request->get('status', 'semua');
+        if ($status === 'aktif') {
+            $query->has('jadwal');
+        } elseif ($status === 'tidak_aktif') {
+            $query->doesntHave('jadwal');
+        } else {
+            // Default: taruh pasien tidak aktif di bawah
+            $query->orderByRaw('(SELECT COUNT(*) FROM jadwal WHERE jadwal.pasien_id = pasien.id) DESC');
+        }
+
+        if($sort === 'nama') {
+            $query->orderBy('nama_pasien', 'asc');
+        } else {
+            $query->orderBy('created_at', $sort === 'terlama' ? 'asc' : 'desc');
+        }
 
         $pasien = $query->paginate(10)->withQueryString();
 

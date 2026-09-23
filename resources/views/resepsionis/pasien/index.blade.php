@@ -229,13 +229,19 @@
     </div>
 
     <div class="sort-box">
+        Status:
+        <select name="status" onchange="document.getElementById('filterForm').submit()">
+            <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua</option>
+            <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+            <option value="tidak_aktif" {{ request('status') == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+        </select>
         Urutkan:
         <select name="sort" onchange="document.getElementById('filterForm').submit()">
             <option value="terbaru" {{ request('sort','terbaru') == 'terbaru' ? 'selected' : '' }}>Terbaru</option>
             <option value="terlama" {{ request('sort') == 'terlama'  ? 'selected' : '' }}>Terlama</option>
             <option value="nama"    {{ request('sort') == 'nama'     ? 'selected' : '' }}>Nama A–Z</option>
         </select>
-        <input type="hidden" name="search" value="{{ $search ?? '' }}">
+        <input type="hidden" name="search" value="{{ request('search') ?? '' }}">
     </div>
 </div>
 </form>
@@ -284,7 +290,6 @@
 
                         $isAktif = $p->jadwal()->exists();
                     @endphp
-                    <tr>
                     <tr onclick="window.location='{{ route('pasien.show', $p->id) }}'" style="cursor: pointer;" title="Klik untuk lihat detail pasien">
                         <td class="id-cell">EP-{{ str_pad($p->id, 3, '0', STR_PAD_LEFT) }}</td>
                         <td>
