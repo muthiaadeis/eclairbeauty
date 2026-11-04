@@ -275,8 +275,9 @@
             <input type="hidden" name="status" id="inputStatus" value="{{ request('status', 'semua') }}">
             <div class="custom-dropdown-btn" onclick="toggleCustomDropdown('dropdownStatus')">
                 <span id="textStatus">
-                    @if(request('status') == 'aktif') Aktif
-                    @elseif(request('status') == 'tidak_aktif') Tidak Aktif
+                    @if(request('status') == 'aktif') Ada Jadwal
+                    @elseif(request('status') == 'tidak_aktif') Belum Ada Jadwal
+                    @elseif(request('status') == 'nonaktif') Nonaktif
                     @else Semua @endif
                 </span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -285,8 +286,9 @@
             </div>
             <div class="custom-dropdown-menu">
                 <button type="button" class="cd-item {{ request('status', 'semua') == 'semua' ? 'selected' : '' }}" onclick="selectCustomDropdown('Status', 'semua', 'Semua')">Semua</button>
-                <button type="button" class="cd-item {{ request('status') == 'aktif' ? 'selected' : '' }}" onclick="selectCustomDropdown('Status', 'aktif', 'Aktif')">Aktif</button>
-                <button type="button" class="cd-item {{ request('status') == 'tidak_aktif' ? 'selected' : '' }}" onclick="selectCustomDropdown('Status', 'tidak_aktif', 'Tidak Aktif')">Tidak Aktif</button>
+                <button type="button" class="cd-item {{ request('status') == 'aktif' ? 'selected' : '' }}" onclick="selectCustomDropdown('Status', 'aktif', 'Ada Jadwal')">Ada Jadwal</button>
+                <button type="button" class="cd-item {{ request('status') == 'tidak_aktif' ? 'selected' : '' }}" onclick="selectCustomDropdown('Status', 'tidak_aktif', 'Belum Ada Jadwal')">Belum Ada Jadwal</button>
+                <button type="button" class="cd-item {{ request('status') == 'nonaktif' ? 'selected' : '' }}" onclick="selectCustomDropdown('Status', 'nonaktif', 'Nonaktif')">Nonaktif</button>
             </div>
         </div>
 
@@ -379,10 +381,12 @@
                             {{ $kunjunganTerakhir ? \Carbon\Carbon::parse($kunjunganTerakhir)->locale('id')->isoFormat('D MMM YYYY') : '-' }}
                         </td>
                         <td>
-                            @if($isAktif)
-                                <span class="badge-aktif">Aktif</span>
+                            @if(!$p->is_aktif)
+                                <span class="badge-tdk-aktif" style="background:#FEE2E2;color:#B91C1C;">Nonaktif</span>
+                            @elseif($isAktif)
+                                <span class="badge-aktif">Ada Jadwal</span>
                             @else
-                                <span class="badge-tdk-aktif">Tidak Aktif</span>
+                                <span class="badge-tdk-aktif">Belum Ada Jadwal</span>
                             @endif
                         </td>
                         <td>

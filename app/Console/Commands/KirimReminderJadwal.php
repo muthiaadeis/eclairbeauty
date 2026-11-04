@@ -27,7 +27,7 @@ class KirimReminderJadwal extends Command
 
             foreach ($jadwal as $j) {
                 $pasien = $j->pasien;
-                if (!$pasien || !$pasien->fcm_token) continue;
+                if (!$pasien || !$pasien->is_aktif || !$pasien->fcm_token) continue;
 
                 $sudahDikirim = NotifikasiLog::where('jadwal_id', $j->id)->where('tipe', $label)->exists();
                 if ($sudahDikirim) continue;

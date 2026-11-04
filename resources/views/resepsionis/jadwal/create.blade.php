@@ -51,6 +51,13 @@
 .jam-chip:hover { border-color: #C17B7B; background: #FBF1EC; }
 .jam-chip input[type="radio"] { display: none; }
 .jam-chip.selected { border-color: #C17B7B; background: #C17B7B; color: #fff; font-weight: 600; }
+.jam-chip.disabled {
+    background-color: #f0f0f0;
+    color: #a0a0a0;
+    cursor: not-allowed;
+    border-color: #e0e0e0;
+}
+.jam-chip.disabled:hover { border-color: #e0e0e0; background: #f0f0f0; }
 
 .form-actions { margin-top: 28px; display: flex; gap: 12px; }
 @endsection
@@ -136,9 +143,52 @@
 
 <script>
 function pilihJam(el) {
+    if (el.classList.contains('disabled')) return;
     document.querySelectorAll('.jam-chip').forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
+    el.querySelector('input').checked = true;
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dokterSelect = document.querySelector('select[name="dokter_id"]');
+    const tanggalInput = document.querySelector('input[name="tanggal_jadwal"]');
+
+    function checkJam() {
+        const dokter_id = dokterSelect.value;
+        const tanggal_jadwal = tanggalInput.value;
+
+        if (!dokter_id || !tanggal_jadwal) return;
+
+        fetch(`{{ route('jadwal.jam_terpakai') }}?dokter_id=${dokter_id}&tanggal_jadwal=${tanggal_jadwal}`)
+            .then(response => response.json())
+            .then(data => {
+                document.querySelectorAll('.jam-chip').forEach(chip => {
+                    const input = chip.querySelector('input');
+                    const jam = input.value;
+                    
+                    if (data.includes(jam)) {
+                        chip.classList.add('disabled');
+                        input.disabled = true;
+                        // if currently selected, unselect it
+                        if (chip.classList.contains('selected')) {
+                            chip.classList.remove('selected');
+                            input.checked = false;
+                        }
+                    } else {
+                        chip.classList.remove('disabled');
+                        input.disabled = false;
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching jam terpakai:', error));
+    }
+
+    dokterSelect.addEventListener('change', checkJam);
+    tanggalInput.addEventListener('change', checkJam);
+
+    // Initial check on load
+    checkJam();
+});
 </script>
 
 @endsection

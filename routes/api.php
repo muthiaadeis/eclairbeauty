@@ -9,10 +9,13 @@ Route::post('/pasien/login', [ApiController::class, 'loginPasien']);
 
 Route::middleware('auth.pasien')->group(function () {
     Route::get('/pasien/profil', [ApiController::class, 'profil']);
+    Route::post('/pasien/lengkapi-data', [ApiController::class, 'lengkapiData']);
     Route::get('/jadwal/tersedia', [ApiController::class, 'jadwalTersedia']);
     Route::post('/jadwal/booking', [ApiController::class, 'booking']);
     Route::get('/jadwal/saya', [ApiController::class, 'jadwalSaya']);
+    Route::post('/jadwal/{id}/batal', [ApiController::class, 'batalJadwal']);
     Route::get('/riwayat', [ApiController::class, 'riwayat']);
     Route::post('/pasien/fcm-token', [ApiController::class, 'simpanFcmToken']);
     Route::get('/notifikasi/saya', [ApiController::class, 'riwayatNotifikasi']);
+    Route::post('/pasien/logout', [ApiController::class, 'logoutPasien']);
 });

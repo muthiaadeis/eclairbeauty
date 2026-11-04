@@ -539,6 +539,14 @@
         <!-- MAIN CONTENT -->
         <div class="main-content">
             <main class="page-content">
+                    @unless(request()->routeIs('pasien.index', 'jadwal.index', 'jadwal.create'))
+                    @if(session('success'))
+                        <div class="alert-success">{{ session('success') }}</div>
+                    @endif
+                    @if(session('error'))
+                        <div class="alert-error">{{ session('error') }}</div>
+                    @endif
+                @endunless
                 @yield('content')
             </main>
         </div>

@@ -46,7 +46,19 @@
     border-top: 1px solid #F0E8E2;
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
 }
+
+.nonaktif-banner {
+    background: #FBE0E0;
+    color: #C0392B;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    max-width: 760px;
+}
+.nonaktif-banner a { color: #C0392B; font-weight: 700; text-decoration: underline; }
 @endsection
 
 @section('content')
@@ -59,6 +71,18 @@
     <a href="{{ route('pasien.index') }}" class="btn-secondary">Kembali</a>
 </div>
 
+@if(!$pasien->is_aktif)
+    <div class="nonaktif-banner">
+        @if($pasien->mergedKe)
+            Data ini sudah <strong>digabung</strong> ke
+            <a href="{{ route('pasien.show', $pasien->mergedKe->id) }}">{{ $pasien->mergedKe->nama_pasien }}</a>
+            dan dinonaktifkan. Data tidak dihapus, hanya tidak bisa dipakai untuk jadwal atau rekam medis baru.
+        @else
+            Data pasien ini <strong>nonaktif</strong>, sehingga tidak bisa dipakai untuk jadwal atau rekam medis baru.
+        @endif
+    </div>
+@endif
+
 <div class="card" style="max-width:760px;">
     <div class="profile-banner">
         <div class="profile-banner-avatar">
@@ -66,7 +90,7 @@
         </div>
         <div>
             <div class="profile-banner-name">{{ $pasien->nama_pasien }}</div>
-            <div class="profile-banner-sub">{{ $pasien->no_hp }}</div>
+            <div class="profile-banner-sub">{{ $pasien->no_hp ?? '-' }}</div>
         </div>
     </div>
 
@@ -85,7 +109,7 @@
         </div>
         <div class="detail-item">
             <div class="detail-item-label">Nomor HP</div>
-            <div class="detail-item-value">{{ $pasien->no_hp }}</div>
+            <div class="detail-item-value">{{ $pasien->no_hp ?? '-' }}</div>
         </div>
         <div class="detail-item">
             <div class="detail-item-label">Terdaftar Sejak</div>
@@ -97,9 +121,12 @@
         </div>
     </div>
 
-    <div class="detail-actions">
-        <a href="{{ route('pasien.edit', $pasien->id) }}" class="btn-primary">Edit Data</a>
-    </div>
+    @if($pasien->is_aktif)
+        <div class="detail-actions">
+            <a href="{{ route('pasien.edit', $pasien->id) }}" class="btn-primary">Edit Data</a>
+            <a href="{{ route('pasien.merge.form', $pasien->id) }}" class="btn-secondary">Gabungkan Data Duplikat</a>
+        </div>
+    @endif
 </div>
 
 @endsection

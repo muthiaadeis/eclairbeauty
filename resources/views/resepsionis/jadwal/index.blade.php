@@ -154,6 +154,7 @@
 .jbadge.hadir      { background: #DBEAFE; color: #1E40AF; }
 .jbadge.selesai    { background: #D1FAE5; color: #065F46; }
 .jbadge.batal      { background: #FEE2E2; color: #991B1B; }
+.jbadge.terlewat   { background: #F1F5F9; color: #64748B; }
 
 /* Action icons */
 .aksi-cell { display: flex; align-items: center; gap: 4px; }
@@ -328,10 +329,15 @@
                         $jamSelesai = \Carbon\Carbon::parse($j->jam_jadwal)->addMinutes(30)->format('H:i');
                         $layanan  = $j->keterangan ?: 'Konsultasi Awal';
                         $status   = $j->status_jadwal;
+                        $isLewat  = ($status === 'menunggu') && \Carbon\Carbon::parse($j->tanggal_jadwal . ' ' . $j->jam_jadwal)->isPast();
+                        if ($isLewat) {
+                            $status = 'terlewat';
+                        }
                         $statusLabel = match($status) {
                             'hadir'   => 'Hadir',
                             'selesai' => 'Selesai',
                             'batal'   => 'Dibatalkan',
+                            'terlewat'=> 'Terlewat',
                             default   => 'Menunggu',
                         };
                     @endphp

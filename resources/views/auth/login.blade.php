@@ -104,10 +104,26 @@
             font-weight: bold;
             margin-bottom: 4px;
         }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .logo-container img {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #F0E8E2;
+            padding: 4px;
+            background: #fff;
+        }
     </style>
 </head>
 <body>
     <div class="login-card">
+        <div class="logo-container">
+            <img src="{{ asset('images/logo-eclair.png') }}" alt="Eclair Beauty Clinic Logo">
+        </div>
         <p class="clinic-name">Eclair Beauty Clinic</p>
         <h2 class="login-title">Selamat Datang</h2>
         <p class="login-subtitle">Silakan login untuk melanjutkan</p>

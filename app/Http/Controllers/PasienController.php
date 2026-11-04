@@ -4,20 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pasien;
+use App\Models\NotifikasiLog;
 
 class PasienController extends Controller
 {
     public function index(Request $request)
     {
-        if (!in_array(session('user_role'), ['dokter', 'resepsionis', 'pemilik'])) {
-        return redirect()->route('login');
-        }
-        if(!session('user_id')) return redirect()->route('login');
-
         $search = $request->get('search');
         $sort   = $request->get('sort', 'terbaru');
+        $status = $request->get('status', 'semua');
 
-        $query = Pasien::with('jadwal')->where('is_aktif', true);
+        // Filter "nonaktif": tampilkan pasien yang dinonaktifkan / sudah digabung.
+        // Selain itu, hanya pasien yang masih aktif.
+        $query = Pasien::with('jadwal')->where('is_aktif', $status === 'nonaktif' ? false : true);
 
         if($search) {
             $query->where(function($q) use ($search) {
@@ -26,13 +25,13 @@ class PasienController extends Controller
             });
         }
 
-        $status = $request->get('status', 'semua');
+        // "aktif" = punya jadwal, "tidak_aktif" = belum punya jadwal (bukan is_aktif!)
         if ($status === 'aktif') {
             $query->has('jadwal');
         } elseif ($status === 'tidak_aktif') {
             $query->doesntHave('jadwal');
-        } else {
-            // Default: taruh pasien tidak aktif di bawah
+        } elseif ($status !== 'nonaktif') {
+            // Default: taruh pasien yang belum punya jadwal di bawah
             $query->orderByRaw('(SELECT COUNT(*) FROM jadwal WHERE jadwal.pasien_id = pasien.id) DESC');
         }
 
@@ -49,14 +48,11 @@ class PasienController extends Controller
 
     public function create()
     {
-        if(!session('user_id')) return redirect()->route('login');
         return view('resepsionis.pasien.create');
     }
 
     public function store(Request $request)
     {
-        if(!session('user_id')) return redirect()->route('login');
-
         $request->validate([
             'nama_pasien'   => 'required|string|max:255',
             'no_hp'         => 'required|unique:pasien,no_hp',
@@ -69,21 +65,21 @@ class PasienController extends Controller
             'no_hp.unique'         => 'Nomor HP sudah terdaftar',
         ]);
 
-        Pasien::create($request->all());
+        Pasien::create($request->only([
+            'nama_pasien', 'no_hp', 'tanggal_lahir', 'jenis_kelamin', 'alamat',
+        ]));
 
         return redirect()->route('pasien.index')->with('success', 'Data pasien berhasil ditambahkan!');
     }
 
     public function show($id)
     {
-        if(!session('user_id')) return redirect()->route('login');
         $pasien = Pasien::with('jadwal', 'mergedKe')->findOrFail($id);
         return view('resepsionis.pasien.show', compact('pasien'));
     }
 
     public function edit($id)
     {
-        if(!session('user_id')) return redirect()->route('login');
         $pasien = Pasien::findOrFail($id);
 
         if(!$pasien->is_aktif) {
@@ -96,8 +92,12 @@ class PasienController extends Controller
 
     public function update(Request $request, $id)
     {
-        if(!session('user_id')) return redirect()->route('login');
         $pasien = Pasien::findOrFail($id);
+
+        if(!$pasien->is_aktif) {
+            return redirect()->route('pasien.show', $id)
+                ->with('error', 'Data pasien ini sudah nonaktif dan tidak bisa diubah.');
+        }
 
         $request->validate([
             'nama_pasien'   => 'required|string|max:255',
@@ -111,15 +111,16 @@ class PasienController extends Controller
             'no_hp.unique'         => 'Nomor HP sudah terdaftar',
         ]);
 
-        $pasien->update($request->all());
+        // Hanya kolom data diri — is_aktif, google_uid, dst. tidak boleh ikut ter-update dari form
+        $pasien->update($request->only([
+            'nama_pasien', 'no_hp', 'tanggal_lahir', 'jenis_kelamin', 'alamat',
+        ]));
 
         return redirect()->route('pasien.index')->with('success', 'Data pasien berhasil diupdate!');
     }
 
     public function destroy($id)
     {
-        if(!session('user_id')) return redirect()->route('login');
-
         $pasien = Pasien::findOrFail($id);
         $pasien->update(['is_aktif' => false]);
 
@@ -130,8 +131,6 @@ class PasienController extends Controller
     // Form untuk menggabungkan data pasien duplikat (mis. karena typo no HP saat registrasi)
     public function mergeForm($id)
     {
-        if(!session('user_id')) return redirect()->route('login');
-
         $pasien = Pasien::findOrFail($id);
 
         if(!$pasien->is_aktif) {
@@ -139,8 +138,7 @@ class PasienController extends Controller
                 ->with('error', 'Data pasien ini sudah nonaktif (hasil merge sebelumnya), tidak bisa dijadikan tujuan penggabungan lagi.');
         }
 
-        // Kandidat duplikat: pasien lain yang masih aktif dengan nama mirip,
-        // biar gampang dicari resepsionis
+        // Kandidat duplikat: pasien lain yang masih aktif dengan nama mirip
         $kandidat = Pasien::where('id', '!=', $id)
             ->where('is_aktif', true)
             ->where('nama_pasien', 'like', '%'.$pasien->nama_pasien.'%')
@@ -151,12 +149,9 @@ class PasienController extends Controller
 
     // Eksekusi penggabungan: seluruh jadwal & rekam medis dari data duplikat
     // dipindahkan ke data pasien tujuan ($id). Data duplikat TIDAK dihapus
-    // (rekam medis wajib disimpan sesuai UU Rekam Medis), hanya dinonaktifkan
-    // supaya tidak bisa dipakai lagi untuk input data baru.
+    // (rekam medis wajib disimpan sesuai UU Rekam Medis), hanya dinonaktifkan.
     public function merge(Request $request, $id)
     {
-        if(!session('user_id')) return redirect()->route('login');
-
         $request->validate([
             'duplikat_id' => 'required|exists:pasien,id|different:id',
         ]);
@@ -176,12 +171,28 @@ class PasienController extends Controller
             $duplikat->jadwal()->update(['pasien_id' => $tujuan->id]);
             \App\Models\RekamMedis::where('pasien_id', $duplikat->id)
                 ->update(['pasien_id' => $tujuan->id]);
+            \App\Models\NotifikasiLog::where('pasien_id', $duplikat->id)
+                ->update(['pasien_id' => $tujuan->id]);
 
-            // Nonaktifkan, jangan dihapus — riwayat rekam medis lama
-            // (jika ada yang tercatat sebelum digabung) tetap tersimpan.
+            // Pindahkan akun Google dari duplikat ke tujuan (kalau tujuan belum punya),
+            // supaya pasien yang login via app tetap bisa masuk ke data yang benar.
+            $updateTujuan = [];
+            if (empty($tujuan->google_uid) && !empty($duplikat->google_uid)) {
+                $updateTujuan['google_uid']   = $duplikat->google_uid;
+                $updateTujuan['email_google'] = $duplikat->email_google;
+            }
+            if (empty($tujuan->fcm_token) && !empty($duplikat->fcm_token)) {
+                $updateTujuan['fcm_token'] = $duplikat->fcm_token;
+            }
+            if (!empty($updateTujuan)) {
+                $tujuan->update($updateTujuan);
+            }
+
             $duplikat->update([
                 'is_aktif'     => false,
                 'merged_ke_id' => $tujuan->id,
+                'google_uid'   => null,
+                'fcm_token'    => null,
             ]);
         });
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Models\Jadwal;
 use App\Models\Pasien;
 use App\Models\User;
@@ -28,11 +29,17 @@ class JadwalController extends Controller
     public function create()
     {
         if(!session('user_id')) return redirect()->route('login');
-        $pasien = Pasien::orderBy('nama_pasien')->get();
+
+        // Hanya pasien yang masih aktif (yang sudah digabung/dinonaktifkan tidak boleh dipilih)
+        $pasien = Pasien::where('is_aktif', true)
+                        ->orderBy('nama_pasien')
+                        ->get();
+
         $dokter = User::where('role', 'dokter')
                     ->where('status_aktif', true)
                     ->orderBy('nama')
                     ->get();
+
         return view('resepsionis.jadwal.create', compact('pasien', 'dokter'));
     }
 
@@ -42,12 +49,17 @@ class JadwalController extends Controller
         if(!session('user_id')) return redirect()->route('login');
 
         $request->validate([
-            'pasien_id' => 'required|exists:pasien,id',
+            // Pasien harus ada DAN masih aktif
+            'pasien_id' => [
+                'required',
+                Rule::exists('pasien', 'id')->where('is_aktif', true),
+            ],
             'dokter_id' => 'required|exists:users,id',
             'tanggal_jadwal' => 'required|date',
             'jam_jadwal' => 'required',
         ], [
             'pasien_id.required' => 'Pasien wajib dipilih',
+            'pasien_id.exists' => 'Pasien tidak ditemukan atau sudah dinonaktifkan, jadwal tidak bisa dibuat',
             'dokter_id.required' => 'Dokter wajib dipilih',
             'tanggal_jadwal.required' => 'Tanggal jadwal wajib diisi',
             'jam_jadwal.required' => 'Jam jadwal wajib diisi',
@@ -61,7 +73,7 @@ class JadwalController extends Controller
                     ->first();
 
         if($cek) {
-            return back()->with('error', 'Jam tersebut sudah terisi untuk dokter ini, pilih jam lain!');
+            return back()->withInput()->with('error', 'Jam tersebut sudah terisi untuk dokter ini, pilih jam lain!');
         }
 
         Jadwal::create([
@@ -83,7 +95,14 @@ class JadwalController extends Controller
     {
         if(!session('user_id')) return redirect()->route('login');
 
-        $jadwal = Jadwal::findOrFail($id);
+        $jadwal = Jadwal::with('pasien')->findOrFail($id);
+
+        // Pasien nonaktif tidak boleh di-check-in
+        if (!$jadwal->pasien || !$jadwal->pasien->is_aktif) {
+            return redirect()->route('jadwal.index')
+                            ->with('error', 'Data pasien ini sudah nonaktif, tidak bisa di-check-in.');
+        }
+
         $jadwal->update(['status_jadwal' => 'hadir']);
 
         return redirect()->route('jadwal.index')
@@ -112,5 +131,29 @@ class JadwalController extends Controller
 
         return redirect()->route('jadwal.index')
                         ->with('success', 'Jadwal berhasil dibatalkan!');
+    }
+
+    // Ambil daftar jam yang sudah dibooking (untuk AJAX)
+    public function jamTerpakai(Request $request)
+    {
+        $tanggal = $request->get('tanggal_jadwal');
+        $dokter_id = $request->get('dokter_id');
+
+        if (!$tanggal || !$dokter_id) {
+            return response()->json([]);
+        }
+
+        $terpakai = Jadwal::where('tanggal_jadwal', $tanggal)
+                          ->where('dokter_id', $dokter_id)
+                          ->where('status_jadwal', '!=', 'batal')
+                          ->pluck('jam_jadwal')
+                          ->map(function ($jam) {
+                              return substr($jam, 0, 5); // ambil format HH:MM
+                          })
+                          ->unique()
+                          ->values()
+                          ->toArray();
+
+        return response()->json($terpakai);
     }
 }
