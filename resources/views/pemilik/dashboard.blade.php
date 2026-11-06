@@ -106,6 +106,104 @@
     white-space: nowrap;
 }
 
+/* ── Custom Chart Selector Dropdown ── */
+.custom-chart-select-wrap {
+    position: relative;
+    display: inline-block;
+}
+.custom-chart-select-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1px solid #F0E8E2;
+    background: #FAF6F2;
+    color: #4B5563;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    outline: none;
+}
+.custom-chart-select-btn:hover {
+    border-color: #C17B7B;
+    background: #FFF;
+}
+.custom-chart-select-btn.open {
+    border-color: #C17B7B;
+    box-shadow: 0 0 0 3px rgba(193,123,123,0.12);
+    background: #FFF;
+}
+.custom-chart-select-btn svg {
+    width: 13px;
+    height: 13px;
+    color: #9CA3AF;
+    transition: transform 0.2s;
+}
+.custom-chart-select-btn.open svg {
+    transform: rotate(180deg);
+    color: #C17B7B;
+}
+
+.custom-chart-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 195px;
+    background: #FFF;
+    border: 1px solid #F0E8E2;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    padding: 6px;
+    z-index: 50;
+    overflow: hidden;
+}
+.custom-chart-menu.show {
+    display: block;
+    animation: fadeInDown 0.15s ease-out;
+}
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.custom-chart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 9px 12px;
+    border: none;
+    background: none;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #4B5563;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    text-align: left;
+}
+.custom-chart-item:hover {
+    background: #FAF6F2;
+    color: #C17B7B;
+}
+.custom-chart-item.selected {
+    background: #FAF6F2;
+    color: #C17B7B;
+    font-weight: 600;
+}
+.custom-chart-item .item-check {
+    display: none;
+    color: #C17B7B;
+}
+.custom-chart-item.selected .item-check {
+    display: block;
+}
+
 /* Tabel bisa di-scroll horizontal di layar sempit */
 .table-card-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .table-card-scroll table { min-width: 460px; }
@@ -191,10 +289,24 @@
                 <div class="chart-subtitle" id="chartSubtitle">Statistik kunjungan operasional harian</div>
             </div>
             <div>
-                <select id="chartSelector" onchange="toggleChart()" style="padding: 8px 16px; border-radius: 20px; border: 1px solid #F0E8E2; background: #FAF6F2; color: #6B6B6B; font-size: 13px; outline: none; cursor: pointer; font-family: inherit;">
-                    <option value="kunjungan">Tren Janji Temu</option>
-                    <option value="treatment">Treatment Terbanyak</option>
-                </select>
+                <div class="custom-chart-select-wrap">
+                    <button type="button" class="custom-chart-select-btn" id="btnChartDropdown" onclick="toggleChartDropdown()">
+                        <span id="labelCurrentChart">Tren Janji Temu</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="custom-chart-menu" id="menuChartDropdown">
+                        <button type="button" class="custom-chart-item selected" data-value="kunjungan" onclick="switchChartMode('kunjungan', 'Tren Janji Temu')">
+                            <span>Tren Janji Temu</span>
+                            <svg class="item-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        </button>
+                        <button type="button" class="custom-chart-item" data-value="treatment" onclick="switchChartMode('treatment', 'Treatment Terbanyak')">
+                            <span>Treatment Terbanyak</span>
+                            <svg class="item-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -204,8 +316,24 @@
         </div>
 
         {{-- Container Treatment --}}
-        <div id="containerTreatment" style="display: none; position: relative; height: 350px; width: 100%; align-items: center; justify-content: center;">
-            <canvas id="grafikTreatment"></canvas>
+        <div id="containerTreatment" style="display: none; width: 100%;">
+            @if($treatmentTerbanyak->isEmpty())
+                <div style="padding: 56px 20px; text-align: center;">
+                    <div style="width: 58px; height: 58px; border-radius: 50%; background: #FAF6F2; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;">
+                        <svg width="26" height="26" fill="none" stroke="#C17B7B" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                        </svg>
+                    </div>
+                    <div style="font-size: 14.5px; font-weight: 600; color: #3A3A3A; margin-bottom: 6px;">Belum Ada Data Treatment</div>
+                    <div style="font-size: 12.5px; color: #9CA3AF; max-width: 440px; margin: 0 auto; line-height: 1.5;">
+                        Grafik treatment terbanyak akan otomatis muncul begitu dokter mencatat rekam medis tindakan perawatan pasien di sistem.
+                    </div>
+                </div>
+            @else
+                <div style="position: relative; height: 320px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                    <canvas id="grafikTreatment"></canvas>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -364,66 +492,109 @@
 </script>
 
 <script>
-    const labelTreatment = @json($treatmentTerbanyak->pluck('jenis_tindakan'));
-    const dataTreatment  = @json($treatmentTerbanyak->pluck('total'));
+    let chartTreatmentInstance = null;
 
-    new Chart(document.getElementById('grafikTreatment'), {
-        type: 'doughnut',
-        data: {
-            labels: labelTreatment,
-            datasets: [{
-                data: dataTreatment,
-                backgroundColor: [
-                    '#C17B7B', // Rose
-                    '#2C7A9B', // Blue
-                    '#B8860B', // Amber
-                    '#5B8B6C', // Green
-                    '#9B7293'  // Purple/Plum
-                ],
-                borderWidth: 0,
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 12,
-                        padding: 15,
-                        font: { size: 11, family: "'Inter', sans-serif" },
-                        color: '#6B6B6B'
+    function initTreatmentChart() {
+        const canvas = document.getElementById('grafikTreatment');
+        if (!canvas || chartTreatmentInstance) return;
+
+        const labelTreatment = @json($treatmentTerbanyak->pluck('jenis_tindakan'));
+        const dataTreatment  = @json($treatmentTerbanyak->pluck('total'));
+
+        if (!dataTreatment.length) return;
+
+        chartTreatmentInstance = new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+                labels: labelTreatment,
+                datasets: [{
+                    data: dataTreatment,
+                    backgroundColor: [
+                        '#C17B7B', // Rose
+                        '#2C7A9B', // Blue
+                        '#B8860B', // Amber
+                        '#5B8B6C', // Green
+                        '#9B7293'  // Plum
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15,
+                            font: { size: 11, family: "'Inter', sans-serif" },
+                            color: '#6B6B6B'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#3A3A3A',
+                        padding: 10,
+                        cornerRadius: 8,
                     }
                 },
-                tooltip: {
-                    backgroundColor: '#3A3A3A',
-                    padding: 10,
-                    cornerRadius: 8,
-                }
-            },
-            cutout: '65%'
-        }
-    });
-</script>
+                cutout: '65%'
+            }
+        });
+    }
 
-<script>
-    function toggleChart() {
-        const selector = document.getElementById('chartSelector').value;
+    function toggleChartDropdown() {
+        const btn = document.getElementById('btnChartDropdown');
+        const menu = document.getElementById('menuChartDropdown');
+        const isOpen = menu.classList.contains('show');
+        if (isOpen) {
+            menu.classList.remove('show');
+            btn.classList.remove('open');
+        } else {
+            menu.classList.add('show');
+            btn.classList.add('open');
+        }
+    }
+
+    function switchChartMode(mode, label) {
+        document.getElementById('labelCurrentChart').innerText = label;
+        toggleChartDropdown();
+
+        document.querySelectorAll('#menuChartDropdown .custom-chart-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        const activeItem = document.querySelector(`#menuChartDropdown .custom-chart-item[data-value="${mode}"]`);
+        if (activeItem) activeItem.classList.add('selected');
+
         const containerKunjungan = document.getElementById('containerKunjungan');
         const containerTreatment = document.getElementById('containerTreatment');
         const chartSubtitle = document.getElementById('chartSubtitle');
 
-        if (selector === 'kunjungan') {
+        if (mode === 'kunjungan') {
             containerKunjungan.style.display = 'block';
             containerTreatment.style.display = 'none';
             chartSubtitle.textContent = 'Statistik kunjungan operasional harian';
         } else {
             containerKunjungan.style.display = 'none';
-            containerTreatment.style.display = 'flex';
+            containerTreatment.style.display = 'block';
             chartSubtitle.textContent = 'Tindakan paling sering dilakukan';
+            initTreatmentChart();
+            if (chartTreatmentInstance) {
+                chartTreatmentInstance.resize();
+            }
         }
     }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.custom-chart-select-wrap')) {
+            const btn = document.getElementById('btnChartDropdown');
+            const menu = document.getElementById('menuChartDropdown');
+            if (menu && btn) {
+                menu.classList.remove('show');
+                btn.classList.remove('open');
+            }
+        }
+    });
 </script>
 @endsection
