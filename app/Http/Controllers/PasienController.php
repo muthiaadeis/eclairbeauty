@@ -53,6 +53,15 @@ class PasienController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->filled('tanggal_lahir')) {
+            $tgl = trim($request->tanggal_lahir);
+            if (preg_match('/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/', $tgl, $m)) {
+                $request->merge([
+                    'tanggal_lahir' => sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1])
+                ]);
+            }
+        }
+
         $request->validate([
             'nama_pasien'   => 'required|string|max:255',
             'no_hp'         => 'required|unique:pasien,no_hp',
@@ -102,6 +111,15 @@ class PasienController extends Controller
         if(!$pasien->is_aktif) {
             return redirect()->route('pasien.show', $id)
                 ->with('error', 'Data pasien ini sudah nonaktif dan tidak bisa diubah.');
+        }
+
+        if ($request->filled('tanggal_lahir')) {
+            $tgl = trim($request->tanggal_lahir);
+            if (preg_match('/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/', $tgl, $m)) {
+                $request->merge([
+                    'tanggal_lahir' => sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1])
+                ]);
+            }
         }
 
         $request->validate([
@@ -157,6 +175,15 @@ class PasienController extends Controller
     // (rekam medis wajib disimpan sesuai UU Rekam Medis), hanya dinonaktifkan.
     public function merge(Request $request, $id)
     {
+        if ($request->filled('tanggal_lahir')) {
+            $tgl = trim($request->tanggal_lahir);
+            if (preg_match('/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/', $tgl, $m)) {
+                $request->merge([
+                    'tanggal_lahir' => sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1])
+                ]);
+            }
+        }
+
         $request->validate([
             'duplikat_id' => 'required|exists:pasien,id|different:id',
         ]);
