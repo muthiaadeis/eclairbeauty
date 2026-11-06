@@ -141,33 +141,46 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 4px !important;
+    gap: 6px !important;
     width: 100% !important;
     position: static !important;
 }
 .flatpickr-current-month .flatpickr-monthDropdown-months {
     font-weight: 600 !important;
-    color: #3A3A3A !important;
-    font-size: 0.9rem !important;
-    background: transparent !important;
-    border: none !important;
-    border-radius: 6px !important;
-    padding: 2px 6px !important;
+    color: #374151 !important;
+    font-size: 0.88rem !important;
+    background: #FFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 8px !important;
+    padding: 4px 8px !important;
     cursor: pointer !important;
     outline: none !important;
+    transition: all 0.15s !important;
 }
 .flatpickr-current-month .flatpickr-monthDropdown-months:hover {
-    background: rgba(193,123,123,0.15) !important;
-    color: #C17B7B !important;
+    border-color: #C17B7B !important;
+    background: #FAF6F2 !important;
 }
 .flatpickr-current-month .numInputWrapper {
-    width: 65px !important;
+    width: 76px !important;
 }
 .flatpickr-current-month input.cur-year {
     font-weight: 600 !important;
-    color: #3A3A3A !important;
+    color: #374151 !important;
     font-size: 0.9rem !important;
-    padding: 2px 4px !important;
+    padding: 4px 6px !important;
+    background: #FFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 8px !important;
+    cursor: text !important;
+    box-sizing: border-box !important;
+    transition: all 0.15s !important;
+}
+.flatpickr-current-month input.cur-year:focus {
+    border-color: #C17B7B !important;
+    background: #FFF !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(193,123,123,0.15) !important;
 }
 .flatpickr-prev-month, .flatpickr-next-month {
     padding: 6px !important;
@@ -271,14 +284,18 @@ span.flatpickr-weekday {
                 <label class="form-label">Tanggal Lahir</label>
                 <div class="date-input-wrap">
                     <input type="text" id="tanggalLahirPicker" name="tanggal_lahir" class="form-control"
-                           placeholder="Pilih tanggal lahir"
-                           value="{{ old('tanggal_lahir', $pasien->tanggal_lahir) }}" readonly>
+                           placeholder="DD/MM/YYYY (contoh: 17/08/1975)"
+                           value="{{ old('tanggal_lahir', $pasien->tanggal_lahir) }}"
+                           autocomplete="off">
                     <span class="date-input-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                     </span>
                 </div>
+                <span style="font-size: 11.5px; color: #9CA3AF; margin-top: 4px; display: block;">
+                    Bisa diketik langsung (misal: 17/08/1975) atau pilih lewat kalender
+                </span>
             </div>
 
             <div class="form-group">
@@ -327,20 +344,87 @@ span.flatpickr-weekday {
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Flatpickr Kalender Estetik Klinik Eclair
-    flatpickr("#tanggalLahirPicker", {
+    // 1. Flatpickr Kalender Estetik Klinik Eclair (Bisa Ketik Manual & Pilih Tahun Cepat)
+    const fpTanggalLahir = flatpickr("#tanggalLahirPicker", {
         dateFormat: "Y-m-d",
         altInput: true,
-        altFormat: "d F Y",
+        altFormat: "d/m/Y",
         altInputClass: "form-control",
         locale: "id",
         maxDate: "today",
-        allowInput: false,
+        allowInput: true,
         @if(old('tanggal_lahir', $pasien->tanggal_lahir))
         defaultDate: "{{ old('tanggal_lahir', $pasien->tanggal_lahir) }}",
         @endif
-        disableMobile: true
+        disableMobile: true,
+        parseDate: function(dateStr, format) {
+            if (!dateStr) return null;
+            const clean = dateStr.trim();
+            const parts = clean.split(/[\/\-\.]/);
+            if (parts.length === 3) {
+                if (parts[0].length <= 2 && parts[2].length === 4) {
+                    const d = parseInt(parts[0], 10);
+                    const m = parseInt(parts[1], 10) - 1;
+                    const y = parseInt(parts[2], 10);
+                    const dt = new Date(y, m, d);
+                    if (!isNaN(dt.getTime())) return dt;
+                }
+                if (parts[0].length === 4 && parts[2].length <= 2) {
+                    const y = parseInt(parts[0], 10);
+                    const m = parseInt(parts[1], 10) - 1;
+                    const d = parseInt(parts[2], 10);
+                    const dt = new Date(y, m, d);
+                    if (!isNaN(dt.getTime())) return dt;
+                }
+            }
+            return flatpickr.parseDate(dateStr, format);
+        }
     });
+
+    if (fpTanggalLahir.altInput) {
+        let isDeleting = false;
+        fpTanggalLahir.altInput.addEventListener('keydown', function(e) {
+            isDeleting = (e.key === 'Backspace' || e.key === 'Delete');
+        });
+
+        fpTanggalLahir.altInput.addEventListener('input', function() {
+            if (isDeleting) return;
+            let v = this.value.replace(/\D/g, '').slice(0, 8);
+            if (v.length > 4) {
+                this.value = v.slice(0, 2) + '/' + v.slice(2, 4) + '/' + v.slice(4);
+            } else if (v.length > 2) {
+                this.value = v.slice(0, 2) + '/' + v.slice(2);
+            }
+        });
+
+        const syncDate = function() {
+            const val = fpTanggalLahir.altInput.value.trim();
+            if (!val) {
+                fpTanggalLahir.clear();
+                return;
+            }
+            const parts = val.split(/[\/\-\.]/);
+            if (parts.length === 3) {
+                const d = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10) - 1;
+                const y = parseInt(parts[2], 10);
+                if (d >= 1 && d <= 31 && m >= 0 && m <= 11 && y >= 1900 && y <= new Date().getFullYear()) {
+                    const dt = new Date(y, m, d);
+                    if (!isNaN(dt.getTime())) {
+                        fpTanggalLahir.setDate(dt, true);
+                    }
+                }
+            }
+        };
+
+        fpTanggalLahir.altInput.addEventListener('blur', syncDate);
+        fpTanggalLahir.altInput.addEventListener('change', syncDate);
+
+        const parentForm = fpTanggalLahir.element.closest('form');
+        if (parentForm) {
+            parentForm.addEventListener('submit', syncDate);
+        }
+    }
 
     // 2. Custom Dropdown Jenis Kelamin
     const btnGender = document.getElementById('btnDropdownGender');
