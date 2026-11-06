@@ -79,7 +79,7 @@
 .cd-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
     width: 100%;
     padding: 10px 14px;
     border: none;
@@ -100,60 +100,106 @@
     color: #C17B7B;
     font-weight: 600;
 }
+.cd-item .cd-check {
+    display: none;
+    color: #C17B7B;
+}
+.cd-item.selected .cd-check {
+    display: block;
+}
 
 /* ── Custom Flatpickr Kalender Klinik ── */
-@import url('https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css');
-
 .flatpickr-calendar {
+    position: absolute;
+    display: none;
     background: #FFF !important;
     border: 1px solid #F0E8E2 !important;
     border-radius: 16px !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
     font-family: inherit !important;
-    padding: 8px !important;
-    width: 308px !important;
+    padding: 10px !important;
+    width: 310px !important;
+    z-index: 99999 !important;
+}
+.flatpickr-calendar.open {
+    display: inline-block !important;
+    z-index: 99999 !important;
 }
 .flatpickr-calendar::before, .flatpickr-calendar::after { display: none !important; }
 .flatpickr-months {
     background: #FAF6F2 !important;
     border-radius: 10px !important;
-    padding: 4px 6px !important;
+    padding: 6px 8px !important;
     display: flex !important;
     align-items: center !important;
+    position: relative !important;
 }
 .flatpickr-current-month {
-    padding: 4px 0 0 0 !important;
+    padding: 0 !important;
+    font-size: 0.95rem !important;
+    line-height: inherit !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    width: 100% !important;
+    position: static !important;
 }
-.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    font-weight: 600 !important;
+    color: #3A3A3A !important;
+    font-size: 0.9rem !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 2px 6px !important;
+    cursor: pointer !important;
+    outline: none !important;
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months:hover {
+    background: rgba(193,123,123,0.15) !important;
+    color: #C17B7B !important;
+}
+.flatpickr-current-month .numInputWrapper {
+    width: 65px !important;
+}
 .flatpickr-current-month input.cur-year {
     font-weight: 600 !important;
     color: #3A3A3A !important;
+    font-size: 0.9rem !important;
+    padding: 2px 4px !important;
 }
-.flatpickr-current-month .flatpickr-monthDropdown-months:hover {
-    background: rgba(193,123,123,0.1) !important;
+.flatpickr-prev-month, .flatpickr-next-month {
+    padding: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 .flatpickr-prev-month svg, .flatpickr-next-month svg {
     fill: #C17B7B !important;
+    width: 13px !important;
+    height: 13px !important;
 }
 .flatpickr-prev-month:hover svg, .flatpickr-next-month:hover svg {
     fill: #B06B6B !important;
 }
 .flatpickr-weekdays {
-    margin-top: 6px !important;
+    margin-top: 8px !important;
 }
 span.flatpickr-weekday {
-    color: #9B9B9B !important;
+    color: #9CA3AF !important;
     font-weight: 600 !important;
-    font-size: 80% !important;
+    font-size: 0.75rem !important;
 }
 .flatpickr-days { width: 100% !important; }
-.dayContainer { width: 100% !important; min-width: 100% !important; max-width: 100% !important; }
+.dayContainer { width: 100% !important; min-width: 100% !important; max-width: 100% !important; justify-content: space-around !important; }
 .flatpickr-day {
     border-radius: 10px !important;
-    color: #3A3A3A !important;
+    color: #374151 !important;
     height: 36px !important;
     line-height: 36px !important;
     max-width: 38px !important;
+    font-size: 0.85rem !important;
     transition: all 0.15s !important;
 }
 .flatpickr-day:hover {
@@ -169,6 +215,11 @@ span.flatpickr-weekday {
 }
 .flatpickr-day.today {
     border-color: #C17B7B !important;
+    color: #C17B7B !important;
+}
+.flatpickr-day.today:hover {
+    background: #C17B7B !important;
+    color: #FFF !important;
 }
 .flatpickr-input[readonly] {
     cursor: pointer !important;
@@ -238,17 +289,19 @@ span.flatpickr-weekday {
                 <input type="hidden" name="jenis_kelamin" id="inputJenisKelamin" value="{{ $genderVal }}">
                 <div class="custom-dropdown-wrap">
                     <button type="button" class="custom-dropdown-btn" id="btnDropdownGender" onclick="toggleDropdownGender()">
-                        <span id="labelGender">{{ $genderVal == 'P' ? '👩 Perempuan' : ($genderVal == 'L' ? '👨 Laki-laki' : 'Pilih jenis kelamin') }}</span>
+                        <span id="labelGender">{{ $genderVal == 'P' ? 'Perempuan' : ($genderVal == 'L' ? 'Laki-laki' : 'Pilih jenis kelamin') }}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
                     <div class="custom-dropdown-menu" id="menuDropdownGender">
-                        <button type="button" class="cd-item {{ $genderVal == 'P' ? 'selected' : '' }}" data-val="P" onclick="selectGender('P', '👩 Perempuan')">
-                            <span>👩 Perempuan</span>
+                        <button type="button" class="cd-item {{ $genderVal == 'P' ? 'selected' : '' }}" data-val="P" onclick="selectGender('P', 'Perempuan')">
+                            <span>Perempuan</span>
+                            <svg class="cd-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </button>
-                        <button type="button" class="cd-item {{ $genderVal == 'L' ? 'selected' : '' }}" data-val="L" onclick="selectGender('L', '👨 Laki-laki')">
-                            <span>👨 Laki-laki</span>
+                        <button type="button" class="cd-item {{ $genderVal == 'L' ? 'selected' : '' }}" data-val="L" onclick="selectGender('L', 'Laki-laki')">
+                            <span>Laki-laki</span>
+                            <svg class="cd-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </button>
                     </div>
                 </div>
@@ -283,7 +336,9 @@ document.addEventListener('DOMContentLoaded', function() {
         locale: "id",
         maxDate: "today",
         allowInput: false,
+        @if(old('tanggal_lahir', $pasien->tanggal_lahir))
         defaultDate: "{{ old('tanggal_lahir', $pasien->tanggal_lahir) }}",
+        @endif
         disableMobile: true
     });
 

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Eclair Beauty Clinic')</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    @yield('extra_head')
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
