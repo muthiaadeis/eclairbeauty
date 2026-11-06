@@ -13,6 +13,7 @@ class PasienController extends Controller
         $search = $request->get('search');
         $sort   = $request->get('sort', 'terbaru');
         $status = $request->get('status', 'semua');
+        $filter = $request->get('filter', 'semua');
 
         // Filter "nonaktif": tampilkan pasien yang dinonaktifkan / sudah digabung.
         // Selain itu, hanya pasien yang masih aktif.
@@ -30,15 +31,21 @@ class PasienController extends Controller
             $query->has('jadwal');
         } elseif ($status === 'tidak_aktif') {
             $query->doesntHave('jadwal');
-        } elseif ($status !== 'nonaktif') {
-            // Default: taruh pasien yang belum punya jadwal di bawah
-            $query->orderByRaw('(SELECT COUNT(*) FROM jadwal WHERE jadwal.pasien_id = pasien.id) DESC');
         }
 
-        if($sort === 'nama') {
-            $query->orderBy('nama_pasien', 'asc');
+        // Tab "Terakhir Berkunjung" vs "Semua Pasien"
+        if ($filter === 'terbaru') {
+            $query->has('jadwal')
+                  ->orderByRaw('(SELECT MAX(tanggal_jadwal) FROM jadwal WHERE jadwal.pasien_id = pasien.id) DESC');
         } else {
-            $query->orderBy('created_at', $sort === 'terlama' ? 'asc' : 'desc');
+            // Urutan default berdasarkan waktu registrasi (terbaru = pasien baru daftar langsung di posisi atas)
+            if ($sort === 'nama') {
+                $query->orderBy('nama_pasien', 'asc');
+            } elseif ($sort === 'terlama') {
+                $query->orderBy('created_at', 'asc');
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
         }
 
         $pasien = $query->paginate(10)->withQueryString();
