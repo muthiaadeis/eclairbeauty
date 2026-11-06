@@ -32,9 +32,13 @@ class KirimReminderJadwal extends Command
                 $sudahDikirim = NotifikasiLog::where('jadwal_id', $j->id)->where('tipe', $label)->exists();
                 if ($sudahDikirim) continue;
 
-                $judul = "$label Jadwal Tindakan";
+                // Bedakan apakah ini jadwal kontrol lanjutan dari dokter atau konsultasi biasa
+                $isKontrol = str_contains(strtolower($j->keterangan ?? ''), 'kontrol');
+                $namaLayanan = $isKontrol ? 'Kontrol Lanjutan' : 'Konsultasi';
+
+                $judul = "$label Jadwal $namaLayanan";
                 $jam   = substr($j->jam_jadwal, 0, 5);
-                $pesan = "Jangan lupa jadwal Anda tanggal {$j->tanggal_jadwal} pukul {$jam} WIB di Eclair Beauty Clinic.";
+                $pesan = "Pengingat jadwal {$namaLayanan} Anda tanggal {$j->tanggal_jadwal} pukul {$jam} WIB di Eclair Beauty Clinic.";
 
                 $terkirim = $fcm->sendToToken($pasien->fcm_token, $judul, $pesan, [
                     'jadwal_id' => (string) $j->id,

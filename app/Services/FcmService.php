@@ -14,15 +14,19 @@ class FcmService
 
         $projectId = config('services.fcm.project_id');
 
+        $message = [
+            'token' => $token,
+            'notification' => ['title' => $title, 'body' => $body],
+        ];
+
+        if (!empty($data)) {
+            // Pastikan semua value bertipe string untuk FCM v1
+            $message['data'] = array_map('strval', $data);
+        }
+
         $response = Http::withToken($accessToken)->post(
             "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send",
-            [
-                'message' => [
-                    'token' => $token,
-                    'notification' => ['title' => $title, 'body' => $body],
-                    'data' => $data,
-                ],
-            ]
+            ['message' => $message]
         );
 
         return $response->successful();
