@@ -74,6 +74,13 @@ class PemilikController extends Controller
         $sampai  = $request->input('sampai');
         $status  = $request->input('status');
 
+        if ($dari && preg_match('/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/', trim($dari), $m)) {
+            $dari = sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1]);
+        }
+        if ($sampai && preg_match('/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/', trim($sampai), $m)) {
+            $sampai = sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1]);
+        }
+
         $query = Jadwal::with('pasien')
                        ->orderBy('tanggal_jadwal', 'desc')
                        ->orderBy('jam_jadwal', 'desc');

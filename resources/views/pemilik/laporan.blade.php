@@ -36,6 +36,163 @@
     box-shadow: 0 0 0 3px rgba(193, 123, 123, 0.12);
 }
 
+.date-input-wrap {
+    position: relative;
+    display: inline-block;
+}
+.date-input-wrap .filter-input {
+    padding-right: 36px;
+}
+.date-input-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #9B9B9B;
+    display: flex;
+    align-items: center;
+}
+
+/* ── Custom Flatpickr Kalender Estetik Klinik Eclair ── */
+.flatpickr-calendar {
+    position: absolute;
+    display: none;
+    background: #FFF !important;
+    border: 1px solid #F0E8E2 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+    font-family: inherit !important;
+    padding: 10px !important;
+    width: 310px !important;
+    z-index: 99999 !important;
+}
+.flatpickr-calendar.open {
+    display: inline-block !important;
+    z-index: 99999 !important;
+}
+.flatpickr-calendar::before, .flatpickr-calendar::after { display: none !important; }
+.flatpickr-months {
+    background: #FAF6F2 !important;
+    border-radius: 10px !important;
+    padding: 6px 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    position: relative !important;
+}
+.flatpickr-current-month {
+    padding: 0 !important;
+    font-size: 0.95rem !important;
+    line-height: inherit !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    position: static !important;
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    font-weight: 600 !important;
+    color: #374151 !important;
+    font-size: 0.88rem !important;
+    background: #FFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 8px !important;
+    padding: 4px 8px !important;
+    cursor: pointer !important;
+    outline: none !important;
+    transition: all 0.15s !important;
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months:hover {
+    border-color: #C17B7B !important;
+    background: #FAF6F2 !important;
+}
+.flatpickr-current-month .numInputWrapper {
+    width: 76px !important;
+}
+.flatpickr-current-month .numInputWrapper span.arrowUp,
+.flatpickr-current-month .numInputWrapper span.arrowDown {
+    display: none !important;
+}
+.flatpickr-current-month input.cur-year {
+    font-weight: 600 !important;
+    color: #374151 !important;
+    font-size: 0.9rem !important;
+    padding: 4px 8px !important;
+    background: #FFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 8px !important;
+    cursor: text !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    transition: all 0.15s !important;
+    -moz-appearance: textfield !important;
+}
+.flatpickr-current-month input.cur-year::-webkit-inner-spin-button,
+.flatpickr-current-month input.cur-year::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+    display: none !important;
+}
+.flatpickr-current-month input.cur-year:focus {
+    border-color: #C17B7B !important;
+    background: #FFF !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(193,123,123,0.15) !important;
+}
+.flatpickr-prev-month, .flatpickr-next-month {
+    padding: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.flatpickr-prev-month svg, .flatpickr-next-month svg {
+    fill: #C17B7B !important;
+    width: 13px !important;
+    height: 13px !important;
+}
+.flatpickr-prev-month:hover svg, .flatpickr-next-month:hover svg {
+    fill: #B06B6B !important;
+}
+.flatpickr-weekdays {
+    margin-top: 8px !important;
+}
+span.flatpickr-weekday {
+    color: #9CA3AF !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+}
+.flatpickr-days { width: 100% !important; }
+.dayContainer { width: 100% !important; min-width: 100% !important; max-width: 100% !important; justify-content: space-around !important; }
+.flatpickr-day {
+    border-radius: 10px !important;
+    color: #374151 !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    max-width: 38px !important;
+    font-size: 0.85rem !important;
+    transition: all 0.15s !important;
+}
+.flatpickr-day:hover {
+    background: #FBF1EC !important;
+    border-color: #FBF1EC !important;
+    color: #C17B7B !important;
+}
+.flatpickr-day.selected, .flatpickr-day.selected:hover {
+    background: #C17B7B !important;
+    border-color: #C17B7B !important;
+    color: #FFF !important;
+    font-weight: 600 !important;
+}
+.flatpickr-day.today {
+    border-color: #C17B7B !important;
+    color: #C17B7B !important;
+}
+.flatpickr-day.today:hover {
+    background: #C17B7B !important;
+    color: #FFF !important;
+}
+
 /* Custom Dropdown */
 .custom-dropdown {
     position: relative;
@@ -329,11 +486,31 @@
     <form method="GET" action="{{ route('pemilik.laporan') }}" class="filter-row" id="filterForm">
         <div class="filter-group">
             <label>Tanggal Mulai</label>
-            <input type="date" name="dari" class="filter-input" value="{{ $dari ?? '' }}" onchange="this.form.submit()">
+            <div class="date-input-wrap">
+                <input type="text" id="tglMulai" name="dari" class="filter-input"
+                       placeholder="dd/mm/yyyy"
+                       value="{{ $dari ?? '' }}"
+                       autocomplete="off">
+                <span class="date-input-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </span>
+            </div>
         </div>
         <div class="filter-group">
             <label>Tanggal Selesai</label>
-            <input type="date" name="sampai" class="filter-input" value="{{ $sampai ?? '' }}" onchange="this.form.submit()">
+            <div class="date-input-wrap">
+                <input type="text" id="tglSelesai" name="sampai" class="filter-input"
+                       placeholder="dd/mm/yyyy"
+                       value="{{ $sampai ?? '' }}"
+                       autocomplete="off">
+                <span class="date-input-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </span>
+            </div>
         </div>
         <div class="filter-group">
             <label>Status</label>
@@ -577,12 +754,40 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('filterForm');
+
+        // 1. Inisialisasi Flatpickr Estetik Klinik untuk Tanggal Mulai & Tanggal Selesai
+        const fpConfig = {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            altInputClass: "filter-input",
+            locale: "id",
+            allowInput: true,
+            disableMobile: true,
+            onChange: function(selectedDates, dateStr) {
+                if (form) form.submit();
+            }
+        };
+
+        flatpickr("#tglMulai", {
+            ...fpConfig,
+            @if(!empty($dari)) defaultDate: "{{ $dari }}", @endif
+        });
+
+        flatpickr("#tglSelesai", {
+            ...fpConfig,
+            @if(!empty($sampai)) defaultDate: "{{ $sampai }}", @endif
+        });
+
+        // 2. Custom Dropdown Status
         const dropdown = document.getElementById('statusDropdown');
         const trigger = document.getElementById('dropdownTrigger');
         const input = document.getElementById('statusInput');
-        const form = document.getElementById('filterForm');
 
         if (!dropdown || !trigger) return;
 
