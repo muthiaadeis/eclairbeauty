@@ -190,6 +190,25 @@ textarea.fc { resize: vertical; min-height: 82px; }
 .cd-item.selected .cd-check {
     display: block;
 }
+
+/* Hilangkan panah spin atas-bawah di input date bawaan browser */
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+    display: none;
+}
+input[type="date"] {
+    -moz-appearance: textfield;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
 @endsection
 
 @section('content')
@@ -294,12 +313,9 @@ textarea.fc { resize: vertical; min-height: 82px; }
 
             <div class="form-group">
                 <label class="form-label">Tanggal Lahir</label>
-                <input type="text" id="inputTanggalLahir" name="tanggal_lahir"
+                <input type="date" name="tanggal_lahir"
                        class="fc {{ $errors->has('tanggal_lahir') ? 'err' : '' }}"
-                       placeholder="DD/MM/YYYY"
-                       value="{{ old('tanggal_lahir') }}"
-                       maxlength="10"
-                       autocomplete="off">
+                       value="{{ old('tanggal_lahir') }}">
                 @error('tanggal_lahir')<div class="field-err">{{ $message }}</div>@enderror
             </div>
 
@@ -336,25 +352,7 @@ textarea.fc { resize: vertical; min-height: 82px; }
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Auto format DD/MM/YYYY saat user mengetik tanggal lahir
-    const inputTgl = document.getElementById('inputTanggalLahir');
-    if (inputTgl) {
-        let isDeleting = false;
-        inputTgl.addEventListener('keydown', function(e) {
-            isDeleting = (e.key === 'Backspace' || e.key === 'Delete');
-        });
-        inputTgl.addEventListener('input', function() {
-            if (isDeleting) return;
-            let v = this.value.replace(/\D/g, '').slice(0, 8);
-            if (v.length > 4) {
-                this.value = v.slice(0, 2) + '/' + v.slice(2, 4) + '/' + v.slice(4);
-            } else if (v.length > 2) {
-                this.value = v.slice(0, 2) + '/' + v.slice(2);
-            }
-        });
-    }
-
-    // 2. Custom Dropdown Jenis Kelamin
+    // Custom Dropdown Jenis Kelamin
     const btnGender = document.getElementById('btnDropdownGender');
     const menuGender = document.getElementById('menuDropdownGender');
     const inputGender = document.getElementById('inputJenisKelamin');
