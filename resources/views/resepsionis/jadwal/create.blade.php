@@ -224,6 +224,18 @@
     </form>
 </div>
 
+@php
+    $pasienArray = [];
+    foreach($pasien as $p) {
+        $pasienArray[] = [
+            'id' => $p->id,
+            'nama' => $p->nama_pasien,
+            'no_hp' => $p->no_hp ?? '-',
+            'formatted_id' => '#' . str_pad($p->id, 4, '0', STR_PAD_LEFT)
+        ];
+    }
+@endphp
+
 <script>
 function pilihJam(el) {
     if (el.classList.contains('disabled')) return;
@@ -276,14 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // LOGIKA SEARCHABLE DROPDOWN PASIEN
     // (Bisa cari berdasarkan ID Pasien, Nama, atau No HP)
     // ==========================================
-    const pasienList = @json($pasien->map(function($p) {
-        return [
-            'id' => $p->id,
-            'nama' => $p->nama_pasien,
-            'no_hp' => $p->no_hp ?? '-',
-            'formatted_id' => '#' . str_pad($p->id, 4, '0', STR_PAD_LEFT)
-        ];
-    }));
+    const pasienList = {!! json_encode($pasienArray) !!};
 
     const inputSearch = document.getElementById('inputSearchPasien');
     const dropdown = document.getElementById('dropdownPasienList');
