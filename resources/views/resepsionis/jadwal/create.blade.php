@@ -141,11 +141,11 @@
         <div class="form-group" style="position: relative;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <label class="form-label" style="margin-bottom: 0;">Pilih Pasien *</label>
-                <a href="{{ route('pasien.create') }}" target="_blank" style="font-size: 12px; color: #C17B7B; font-weight: 600; text-decoration: none;">+ Daftarkan Pasien Baru</a>
+                <a href="{{ route('pasien.create', ['from' => 'jadwal']) }}" style="font-size: 12px; color: #C17B7B; font-weight: 600; text-decoration: none;">+ Daftarkan Pasien Baru</a>
             </div>
 
             <!-- Hidden input untuk form submit -->
-            <input type="hidden" name="pasien_id" id="selectedPasienId" value="{{ old('pasien_id') }}" required>
+            <input type="hidden" name="pasien_id" id="selectedPasienId" value="{{ old('pasien_id', request('pasien_id')) }}" required>
 
             <!-- Tampilan jika pasien sudah dipilih -->
             <div id="selectedPasienCard" class="pasien-selected-card">
@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="pasien-empty-item">
                     Pasien tidak ditemukan.
                     <div style="margin-top: 6px;">
-                        <a href="{{ route('pasien.create') }}" target="_blank" style="color: #C17B7B; font-weight: 700; text-decoration: none;">+ Daftarkan Pasien Baru</a>
+                        <a href="{{ route('pasien.create', ['from' => 'jadwal']) }}" style="color: #C17B7B; font-weight: 700; text-decoration: none;">+ Daftarkan Pasien Baru</a>
                     </div>
                 </div>`;
         } else {
@@ -369,8 +369,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Inisialisasi jika ada nilai awal dari old('pasien_id')
-    const initialId = "{{ old('pasien_id') }}";
+    // Inisialisasi jika ada nilai awal dari old('pasien_id') atau request('pasien_id')
+    const initialId = "{{ old('pasien_id', request('pasien_id')) }}";
     if (initialId) {
         pilihPasien(initialId);
     }

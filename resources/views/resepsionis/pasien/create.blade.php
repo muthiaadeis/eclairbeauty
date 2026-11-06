@@ -116,7 +116,11 @@ textarea.fc { resize: vertical; min-height: 82px; }
 <div class="breadcrumb">
     <a href="{{ route('resepsionis.dashboard') }}">Manajemen</a>
     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-    <a href="{{ route('pasien.index') }}">Data Pasien</a>
+    @if(request('from') === 'jadwal')
+        <a href="{{ route('jadwal.create') }}">Tambah Jadwal</a>
+    @else
+        <a href="{{ route('pasien.index') }}">Data Pasien</a>
+    @endif
     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
     <span class="bc-active">Tambah Pasien</span>
 </div>
@@ -126,6 +130,9 @@ textarea.fc { resize: vertical; min-height: 82px; }
 
 <form method="POST" action="{{ route('pasien.store') }}">
 @csrf
+@if(request('from'))
+    <input type="hidden" name="from" value="{{ request('from') }}">
+@endif
 <div class="form-card">
 
     <div class="form-two-col">
@@ -212,7 +219,7 @@ textarea.fc { resize: vertical; min-height: 82px; }
     </div>{{-- /form-two-col --}}
 
     <div class="form-actions">
-        <a href="{{ route('pasien.index') }}" class="btn-cancel">Batal</a>
+        <a href="{{ request('from') === 'jadwal' ? route('jadwal.create') : route('pasien.index') }}" class="btn-cancel">Batal</a>
         <button type="submit" class="btn-save">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>

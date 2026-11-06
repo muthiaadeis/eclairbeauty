@@ -65,9 +65,14 @@ class PasienController extends Controller
             'no_hp.unique'         => 'Nomor HP sudah terdaftar',
         ]);
 
-        Pasien::create($request->only([
+        $pasien = Pasien::create($request->only([
             'nama_pasien', 'no_hp', 'tanggal_lahir', 'jenis_kelamin', 'alamat',
         ]));
+
+        if ($request->get('from') === 'jadwal') {
+            return redirect()->route('jadwal.create', ['pasien_id' => $pasien->id])
+                ->with('success', "Pasien {$pasien->nama_pasien} berhasil didaftarkan! Silakan lanjutkan buat jadwal.");
+        }
 
         return redirect()->route('pasien.index')->with('success', 'Data pasien berhasil ditambahkan!');
     }
